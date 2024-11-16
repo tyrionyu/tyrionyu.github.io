@@ -1,0 +1,506 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>TyrionYu Blog</title>
+  <icon>http://tyrionyu.com/icon.png</icon>
+  <subtitle>越努力，越幸运！</subtitle>
+  <link href="/atom.xml" rel="self"/>
+  
+  <link href="http://tyrionyu.com/"/>
+  <updated>2024-11-16T14:35:17.039Z</updated>
+  <id>http://tyrionyu.com/</id>
+  
+  <author>
+    <name>Tyrion Yu</name>
+    
+  </author>
+  
+  <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>茶叶包装</title>
+    <link href="http://tyrionyu.com/2024/11/tea-package/"/>
+    <id>http://tyrionyu.com/2024/11/tea-package/</id>
+    <published>2024-11-16T14:14:16.000Z</published>
+    <updated>2024-11-16T14:35:17.039Z</updated>
+    
+    <summary type="html">
+    
+      &lt;p&gt;&lt;img src=&quot;/images/tea-7001.png&quot; alt=&quot;&quot;&gt;&lt;/p&gt;
+    
+    </summary>
+    
+    
+      <category term="works" scheme="http://tyrionyu.com/categories/works/"/>
+    
+    
+      <category term="包装" scheme="http://tyrionyu.com/tags/package/"/>
+    
+      <category term="礼盒" scheme="http://tyrionyu.com/tags/gift-box/"/>
+    
+      <category term="茶业包装" scheme="http://tyrionyu.com/tags/%E8%8C%B6%E4%B8%9A%E5%8C%85%E8%A3%85/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>电商合集</title>
+    <link href="http://tyrionyu.com/2020/10/e-commerce/"/>
+    <id>http://tyrionyu.com/2020/10/e-commerce/</id>
+    <published>2020-10-14T14:27:13.000Z</published>
+    <updated>2024-08-31T13:34:56.952Z</updated>
+    
+    <summary type="html">
+    
+      &lt;p&gt;之前做过的一些电商项目，点击图片观看，可以查看大图。&lt;/p&gt;
+    
+    </summary>
+    
+    
+      <category term="works" scheme="http://tyrionyu.com/categories/works/"/>
+    
+    
+      <category term="电商" scheme="http://tyrionyu.com/tags/e-commerce/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>2019年时间的朋友跨年演讲金句</title>
+    <link href="http://tyrionyu.com/2020/01/time-friends-2019/"/>
+    <id>http://tyrionyu.com/2020/01/time-friends-2019/</id>
+    <published>2020-01-01T09:27:28.000Z</published>
+    <updated>2024-08-31T13:34:56.952Z</updated>
+    
+    <summary type="html">
+    
+      
+      
+        
+        
+          &lt;ol&gt;
+&lt;li&gt;品牌，就是你愿意和他自拍。&lt;/li&gt;
+&lt;li&gt;力不到，不为财。&lt;/li&gt;
+&lt;li&gt;钱从哪里来？从人与人链接中来。你是谁？你干啥？你为谁干？别人需要你吗？社会更好了么？&lt;/li&gt;
+&lt;li&gt;假如你觉得教育的成本太高，试试看无知的代价。&lt;/li&gt;
+&lt;li&gt;课程的本质是
+        
+      
+    
+    </summary>
+    
+    
+      <category term="随笔" scheme="http://tyrionyu.com/categories/essay/"/>
+    
+    
+  </entry>
+  
+  <entry>
+    <title>奔跑吧2019，我的年度计划</title>
+    <link href="http://tyrionyu.com/2019/02/2019-new-year-plan/"/>
+    <id>http://tyrionyu.com/2019/02/2019-new-year-plan/</id>
+    <published>2019-02-13T13:48:52.000Z</published>
+    <updated>2024-08-31T13:34:56.952Z</updated>
+    
+    <summary type="html">
+    
+      
+      
+        
+        
+          &lt;p&gt;2018年已经过去，大家都在怀念2018年的时候，2019年已经来了，新的一年，你准备好了吗？今天对2019做个计划，希望这一年这些都可以实现。&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;p&gt;&lt;strong&gt;家庭生活&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;每天给小盆友讲2次故事；&lt;
+        
+      
+    
+    </summary>
+    
+    
+      <category term="随笔" scheme="http://tyrionyu.com/categories/essay/"/>
+    
+    
+      <category term="计划" scheme="http://tyrionyu.com/tags/plan-goal/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>weiming xinxi official website</title>
+    <link href="http://tyrionyu.com/2018/12/weiming-web/"/>
+    <id>http://tyrionyu.com/2018/12/weiming-web/</id>
+    <published>2018-12-26T09:02:11.000Z</published>
+    <updated>2024-08-31T13:34:56.951Z</updated>
+    
+    <summary type="html">
+    
+      &lt;br /&gt;
+&lt;br /&gt;
+&lt;img src=&quot;/images/weiming-web_01_tyrionyu.jpg&quot; alt=&quot;&quot;&gt;
+&lt;img src=&quot;/images/weiming-web_02_tyrionyu.jpg&quot; alt=&quot;&quot;&gt;
+&lt;img src=&quot;/images/weiming-web_03_tyrionyu.jpg&quot; alt=&quot;&quot;&gt;
+    
+    </summary>
+    
+    
+      <category term="works" scheme="http://tyrionyu.com/categories/works/"/>
+    
+    
+      <category term="官网设计" scheme="http://tyrionyu.com/tags/official-web/"/>
+    
+      <category term="网页设计" scheme="http://tyrionyu.com/tags/web-design/"/>
+    
+      <category term="webdesign" scheme="http://tyrionyu.com/tags/webdesign/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>管理电脑文件和文件夹技巧</title>
+    <link href="http://tyrionyu.com/2018/10/manage-computer-files-and-folders-tips/"/>
+    <id>http://tyrionyu.com/2018/10/manage-computer-files-and-folders-tips/</id>
+    <published>2018-10-16T23:56:04.000Z</published>
+    <updated>2024-08-31T13:34:56.951Z</updated>
+    
+    <summary type="html">
+    
+      &lt;h2 id=&quot;TIP1：工作和生活文件夹&quot;&gt;&lt;a href=&quot;#TIP1：工作和生活文件夹&quot; class=&quot;headerlink&quot; title=&quot;TIP1：工作和生活文件夹&quot;&gt;&lt;/a&gt;TIP1：工作和生活文件夹&lt;/h2&gt;&lt;p&gt;对于很多人来说，最简单的就是创建一个工作文件夹和一个生活文件夹，分别用来保存工作资料和生活信息，方便查找。文件夹类别不要过多，也不宜太细（查询打开都很不易）。&lt;/p&gt;
+&lt;h2 id=&quot;TIP2：文件夹名中添加一个三位数字&quot;&gt;&lt;a href=&quot;#TIP2：文件夹名中添加一个三位数字&quot; class=&quot;headerlink&quot; title=&quot;TIP2：文件夹名中添加一个三位数字&quot;&gt;&lt;/a&gt;TIP2：文件夹名中添加一个三位数字&lt;/h2&gt;&lt;p&gt;当你分配一个文件夹名称从零开始的文件夹名称，如“010”或“020” &lt;strong&gt;&lt;code&gt;三位数字&lt;/code&gt;&lt;/strong&gt;添加到文件夹名称前，效率是大大的提高。&lt;br&gt;&lt;img src=&quot;/images/manage-folders-00.png&quot; alt=&quot; &quot;&gt;&lt;/p&gt;
+&lt;p&gt;为什么是三位数而不是两位数呢？&lt;/p&gt;
+    
+    </summary>
+    
+    
+      <category term="经验" scheme="http://tyrionyu.com/categories/experience/"/>
+    
+    
+      <category term="文件管理" scheme="http://tyrionyu.com/tags/file-management/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>在一台电脑上使用两个Github账号</title>
+    <link href="http://tyrionyu.com/2018/09/use-two-github-accounts-on-one-computer/"/>
+    <id>http://tyrionyu.com/2018/09/use-two-github-accounts-on-one-computer/</id>
+    <published>2018-09-14T13:44:19.000Z</published>
+    <updated>2024-08-31T13:34:56.951Z</updated>
+    
+    <summary type="html">
+    
+      最近在使用github的时候,有这样的一个需求,就是一台电脑上登录两个github账号,并上传项目和更新自己的代码,大家都知道需要给该账号添加一个SSH key才能访问，当然如果你在多台机器使用一个账户，你可以为该账户添加多个SSH key。由于github是使用SSH key的fingerprint来判定你是哪个账户，而不是通过用户名，这样你就可以在设置完之后，在本地直接执行下面的语句，它就会自动使用你的.ssh/id_rsa.pub所对应的账户进行登陆，然后执行相关命令。
+    
+    </summary>
+    
+    
+      <category term="经验" scheme="http://tyrionyu.com/categories/experience/"/>
+    
+    
+      <category term="github" scheme="http://tyrionyu.com/tags/github/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>macOS 使用小技巧</title>
+    <link href="http://tyrionyu.com/2018/03/macos-tips/"/>
+    <id>http://tyrionyu.com/2018/03/macos-tips/</id>
+    <published>2018-03-20T15:07:55.000Z</published>
+    <updated>2024-08-31T13:34:56.950Z</updated>
+    
+    <summary type="html">
+    
+      macOS是个了不起的操作系统，有一些你不知道的功能或技巧，实际上可能会对你的工作或学习非常有用。
+    
+    </summary>
+    
+    
+      <category term="工具" scheme="http://tyrionyu.com/categories/tools/"/>
+    
+    
+      <category term="macos" scheme="http://tyrionyu.com/tags/macos/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>家庭用品有限公司画册</title>
+    <link href="http://tyrionyu.com/2018/01/brighton-brochures/"/>
+    <id>http://tyrionyu.com/2018/01/brighton-brochures/</id>
+    <published>2018-01-04T11:18:24.000Z</published>
+    <updated>2024-08-31T13:34:56.950Z</updated>
+    
+    <summary type="html">
+    
+      家庭用品有限公司画册、外贸画册、宣传目录、产品目录设计、版式设计
+    
+    </summary>
+    
+    
+      <category term="works" scheme="http://tyrionyu.com/categories/works/"/>
+    
+    
+      <category term="版式设计" scheme="http://tyrionyu.com/tags/layout/"/>
+    
+      <category term="画册" scheme="http://tyrionyu.com/tags/brochures/"/>
+    
+      <category term="样本" scheme="http://tyrionyu.com/tags/sample/"/>
+    
+      <category term="宣传册" scheme="http://tyrionyu.com/tags/portfolio/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>洋酒宣传册</title>
+    <link href="http://tyrionyu.com/2017/12/montmartre-brochures/"/>
+    <id>http://tyrionyu.com/2017/12/montmartre-brochures/</id>
+    <published>2017-12-29T02:05:50.000Z</published>
+    <updated>2024-08-31T13:34:56.950Z</updated>
+    
+    <summary type="html">
+    
+      白兰地、葡萄酒、葡萄酒、红酒、洋酒宣传画册设计
+    
+    </summary>
+    
+    
+      <category term="works" scheme="http://tyrionyu.com/categories/works/"/>
+    
+    
+      <category term="版式设计" scheme="http://tyrionyu.com/tags/layout/"/>
+    
+      <category term="画册" scheme="http://tyrionyu.com/tags/brochures/"/>
+    
+      <category term="样本" scheme="http://tyrionyu.com/tags/sample/"/>
+    
+      <category term="宣传册" scheme="http://tyrionyu.com/tags/portfolio/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>影视公司宣传册设计</title>
+    <link href="http://tyrionyu.com/2017/12/futurers-brochures-design/"/>
+    <id>http://tyrionyu.com/2017/12/futurers-brochures-design/</id>
+    <published>2017-12-28T07:06:54.000Z</published>
+    <updated>2024-08-31T13:34:56.950Z</updated>
+    
+    <summary type="html">
+    
+      影视公司、宣传片拍摄、广告片制作、视频拍摄公司画册设计、画册排版
+    
+    </summary>
+    
+    
+      <category term="works" scheme="http://tyrionyu.com/categories/works/"/>
+    
+    
+      <category term="版式设计" scheme="http://tyrionyu.com/tags/layout/"/>
+    
+      <category term="画册" scheme="http://tyrionyu.com/tags/brochures/"/>
+    
+      <category term="样本" scheme="http://tyrionyu.com/tags/sample/"/>
+    
+      <category term="宣传册" scheme="http://tyrionyu.com/tags/portfolio/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>干红葡萄酒、干白葡萄酒海报广告版式设计</title>
+    <link href="http://tyrionyu.com/2017/12/wine-advertising-design/"/>
+    <id>http://tyrionyu.com/2017/12/wine-advertising-design/</id>
+    <published>2017-12-27T06:24:39.000Z</published>
+    <updated>2024-08-31T13:34:56.950Z</updated>
+    
+    <summary type="html">
+    
+      红酒、干红葡萄酒、干白葡萄酒、葡萄酒海报、葡萄酒DM单、葡萄酒广告、单页、版式设计
+    
+    </summary>
+    
+    
+      <category term="works" scheme="http://tyrionyu.com/categories/works/"/>
+    
+    
+      <category term="海报" scheme="http://tyrionyu.com/tags/poster/"/>
+    
+      <category term="DM" scheme="http://tyrionyu.com/tags/dm/"/>
+    
+      <category term="版式设计" scheme="http://tyrionyu.com/tags/layout/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>xm neworiental school design</title>
+    <link href="http://tyrionyu.com/2017/12/neworiental/"/>
+    <id>http://tyrionyu.com/2017/12/neworiental/</id>
+    <published>2017-12-20T14:18:03.000Z</published>
+    <updated>2024-08-31T13:34:56.949Z</updated>
+    
+    <summary type="html">
+    
+      厦门新东方学校设计的宣传物料,主要是一海报和X展架。
+    
+    </summary>
+    
+    
+      <category term="works" scheme="http://tyrionyu.com/categories/works/"/>
+    
+    
+      <category term="海报" scheme="http://tyrionyu.com/tags/poster/"/>
+    
+      <category term="x展架" scheme="http://tyrionyu.com/tags/rool-up/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>7个礼盒包装</title>
+    <link href="http://tyrionyu.com/2017/11/gift-package/"/>
+    <id>http://tyrionyu.com/2017/11/gift-package/</id>
+    <published>2017-11-14T11:36:39.000Z</published>
+    <updated>2024-08-31T13:34:56.949Z</updated>
+    
+    <summary type="html">
+    
+      &lt;p&gt;&lt;img src=&quot;/images/bamboo-shoots_by_tyrionyu.jpg&quot; alt=&quot;幼笋礼盒包装&quot;&gt;&lt;/p&gt;
+    
+    </summary>
+    
+    
+      <category term="works" scheme="http://tyrionyu.com/categories/works/"/>
+    
+    
+      <category term="包装" scheme="http://tyrionyu.com/tags/package/"/>
+    
+      <category term="礼盒" scheme="http://tyrionyu.com/tags/gift-box/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>设计一份体验好的表单16点建议</title>
+    <link href="http://tyrionyu.com/2017/11/design-a-good-experience-form-16-suggestions/"/>
+    <id>http://tyrionyu.com/2017/11/design-a-good-experience-form-16-suggestions/</id>
+    <published>2017-11-10T08:50:58.000Z</published>
+    <updated>2024-08-31T13:34:56.949Z</updated>
+    
+    <summary type="html">
+    
+      &lt;p&gt;设计师通常犯的错误以及如何改正它们，下面会列出一些设计师常见的错误以及如何修复这些错误：&lt;/p&gt;
+&lt;h2 id=&quot;设计师常见的问题&quot;&gt;&lt;a href=&quot;#设计师常见的问题&quot; class=&quot;headerlink&quot; title=&quot;设计师常见的问题&quot;&gt;&lt;/a&gt;设计师常见的问题&lt;/h2&gt;&lt;p&gt;&lt;img src=&quot;/images/01.jpg&quot; alt=&quot;设计师常见的问题&quot;&gt;&lt;br&gt;无论是注册流程还是步骤流程，或者是单调的数据录入界面，表单是数字产品设计中最重要的组件之一。本文主要讲述表单设计的常见注意事项。记住，这些是一般意义的指南，每条规则都有例外。&lt;/p&gt;
+&lt;h2 id=&quot;表单应为一列&quot;&gt;&lt;a href=&quot;#表单应为一列&quot; class=&quot;headerlink&quot; title=&quot;表单应为一列&quot;&gt;&lt;/a&gt;表单应为一列&lt;/h2&gt;&lt;p&gt;&lt;img src=&quot;/images/02.jpg&quot; alt=&quot;表单应为一列&quot;&gt;&lt;br&gt;通常的设计中，请保持表格为同一列，因为根据用户的阅读习惯，这样会更加自然&lt;/p&gt;
+    
+    </summary>
+    
+    
+      <category term="经验" scheme="http://tyrionyu.com/categories/experience/"/>
+    
+    
+      <category term="表单" scheme="http://tyrionyu.com/tags/form/"/>
+    
+      <category term="交互" scheme="http://tyrionyu.com/tags/interactive/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>小菜</title>
+    <link href="http://tyrionyu.com/2017/11/small-dishes/"/>
+    <id>http://tyrionyu.com/2017/11/small-dishes/</id>
+    <published>2017-11-08T09:12:35.000Z</published>
+    <updated>2024-08-31T13:34:56.948Z</updated>
+    
+    <summary type="html">
+    
+      &lt;p&gt;&lt;img src=&quot;/images/mustard_by_tyrionyu.jpg&quot; alt=&quot;梅菜笋丝&quot;&gt;&lt;br&gt;&lt;img src=&quot;/images/jinrusun_by_tyrionyu.jpg&quot; alt=&quot;金菇笋丝&quot;&gt;&lt;/p&gt;
+    
+    </summary>
+    
+    
+      <category term="works" scheme="http://tyrionyu.com/categories/works/"/>
+    
+    
+      <category term="包装" scheme="http://tyrionyu.com/tags/package/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>笋宣传物料</title>
+    <link href="http://tyrionyu.com/2017/11/bamboo-promotional-material/"/>
+    <id>http://tyrionyu.com/2017/11/bamboo-promotional-material/</id>
+    <published>2017-11-08T09:12:12.000Z</published>
+    <updated>2024-08-31T13:34:56.948Z</updated>
+    
+    <summary type="html">
+    
+      &lt;p&gt;&lt;img src=&quot;/images/poster01_by_tyrionyu.jpg&quot; alt=&quot;海报&quot;&gt;&lt;br&gt;&lt;img src=&quot;/images/xin_by_tyrionyu.jpg&quot; alt=&quot;海报&quot;&gt;&lt;/p&gt;
+    
+    </summary>
+    
+    
+      <category term="works" scheme="http://tyrionyu.com/categories/works/"/>
+    
+    
+      <category term="海报" scheme="http://tyrionyu.com/tags/poster/"/>
+    
+      <category term="x展架" scheme="http://tyrionyu.com/tags/rool-up/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>特色美食黄粿礼盒</title>
+    <link href="http://tyrionyu.com/2017/11/specialties-huangguo-gift-box/"/>
+    <id>http://tyrionyu.com/2017/11/specialties-huangguo-gift-box/</id>
+    <published>2017-11-08T09:11:18.000Z</published>
+    <updated>2024-08-31T13:34:56.949Z</updated>
+    
+    <summary type="html">
+    
+      &lt;p&gt;黄粿又名黄米粿、黄金粿等，由粳米、植物碱等制成，是中国福建省、浙江省等地的传统年节食品。黄粿与年糕相似却又与其不同，黄粿黄里透绿，色泽晶莹、清香柔韧，十分可口，滋味清香，营养丰富，既可当菜又可当主食。&lt;br&gt;&lt;img src=&quot;/images/ricecake01_by_tyrionyu.jpg&quot; alt=&quot;黄粿包装盒效果图&quot;&gt;&lt;/p&gt;
+    
+    </summary>
+    
+    
+      <category term="works" scheme="http://tyrionyu.com/categories/works/"/>
+    
+    
+      <category term="包装" scheme="http://tyrionyu.com/tags/package/"/>
+    
+      <category term="礼盒" scheme="http://tyrionyu.com/tags/gift-box/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>竹笋食品包装设计</title>
+    <link href="http://tyrionyu.com/2017/11/bamboo-package/"/>
+    <id>http://tyrionyu.com/2017/11/bamboo-package/</id>
+    <published>2017-11-07T16:02:50.000Z</published>
+    <updated>2024-08-31T13:34:56.948Z</updated>
+    
+    <summary type="html">
+    
+      &lt;p&gt;&lt;img src=&quot;/images/ku_001_by_tyrionyu.png&quot; alt=&quot;苦笋&quot;&gt;&lt;br&gt;&lt;img src=&quot;/images/gan_002_by_tyrionyu.png&quot; alt=&quot;笋干&quot;&gt;&lt;/p&gt;
+    
+    </summary>
+    
+    
+      <category term="works" scheme="http://tyrionyu.com/categories/works/"/>
+    
+    
+      <category term="包装" scheme="http://tyrionyu.com/tags/package/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Git使用技巧</title>
+    <link href="http://tyrionyu.com/2017/10/git-tips/"/>
+    <id>http://tyrionyu.com/2017/10/git-tips/</id>
+    <published>2017-10-10T14:01:25.000Z</published>
+    <updated>2024-08-31T13:34:56.948Z</updated>
+    
+    <summary type="html">
+    
+      &lt;p&gt;为了搭建Hexo个人博客的学习Git&lt;/p&gt;
+&lt;h1 id=&quot;目录：&quot;&gt;&lt;a href=&quot;#目录：&quot; class=&quot;headerlink&quot; title=&quot;目录：&quot;&gt;&lt;/a&gt;目录：&lt;/h1&gt;&lt;!-- toc --&gt;
+&lt;h1 id=&quot;1-安装Git&quot;&gt;&lt;a href=&quot;#1-安装Git&quot; class=&quot;headerlink&quot; title=&quot;1.安装Git&quot;&gt;&lt;/a&gt;1.安装Git&lt;/h1&gt;&lt;p&gt;可以从&lt;a href=&quot;//git-scm.com&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;Git的官网&lt;/a&gt;下载安装包：&lt;br&gt;-&lt;strong&gt;Git for Windows&lt;/strong&gt; &lt;a href=&quot;http://git-scm.com/download/win&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;http://git-scm.com/download/win&lt;/a&gt; 网站会自动判断系统下载；&lt;br&gt;-&lt;strong&gt;Git for MAC&lt;/strong&gt; &lt;a href=&quot;http://git-scm.com/download/mac&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;http://git-scm.com/download/mac&lt;/a&gt; 假如用Mac电脑有安装Xcode,默认会安装Git；&lt;br&gt;-&lt;strong&gt;Git for Linux&lt;/strong&gt; &lt;a href=&quot;http://git-scm.com/download/linux&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;http://git-scm.com/download/linux&lt;/a&gt; Linux安装步骤；&lt;/p&gt;
+    
+    </summary>
+    
+    
+    
+      <category term="git" scheme="http://tyrionyu.com/tags/git/"/>
+    
+  </entry>
+  
+</feed>
