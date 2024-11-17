@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://tyrionyu.com/"/>
-  <updated>2024-11-16T14:35:17.039Z</updated>
+  <updated>2024-11-17T02:39:55.560Z</updated>
   <id>http://tyrionyu.com/</id>
   
   <author>
@@ -21,11 +21,11 @@
     <link href="http://tyrionyu.com/2024/11/tea-package/"/>
     <id>http://tyrionyu.com/2024/11/tea-package/</id>
     <published>2024-11-16T14:14:16.000Z</published>
-    <updated>2024-11-16T14:35:17.039Z</updated>
+    <updated>2024-11-17T02:39:55.560Z</updated>
     
     <summary type="html">
     
-      &lt;p&gt;&lt;img src=&quot;/images/tea-7001.png&quot; alt=&quot;&quot;&gt;&lt;/p&gt;
+      茶叶包装设计、泡袋设计、包装盒、精装盒设计、手提袋、不干胶设计
     
     </summary>
     
@@ -234,13 +234,13 @@
       <category term="works" scheme="http://tyrionyu.com/categories/works/"/>
     
     
-      <category term="画册" scheme="http://tyrionyu.com/tags/brochures/"/>
-    
       <category term="版式设计" scheme="http://tyrionyu.com/tags/layout/"/>
     
-      <category term="样本" scheme="http://tyrionyu.com/tags/sample/"/>
-    
       <category term="宣传册" scheme="http://tyrionyu.com/tags/portfolio/"/>
+    
+      <category term="画册" scheme="http://tyrionyu.com/tags/brochures/"/>
+    
+      <category term="样本" scheme="http://tyrionyu.com/tags/sample/"/>
     
   </entry>
   
@@ -261,13 +261,13 @@
       <category term="works" scheme="http://tyrionyu.com/categories/works/"/>
     
     
-      <category term="画册" scheme="http://tyrionyu.com/tags/brochures/"/>
-    
       <category term="版式设计" scheme="http://tyrionyu.com/tags/layout/"/>
     
-      <category term="样本" scheme="http://tyrionyu.com/tags/sample/"/>
-    
       <category term="宣传册" scheme="http://tyrionyu.com/tags/portfolio/"/>
+    
+      <category term="画册" scheme="http://tyrionyu.com/tags/brochures/"/>
+    
+      <category term="样本" scheme="http://tyrionyu.com/tags/sample/"/>
     
   </entry>
   
@@ -288,13 +288,13 @@
       <category term="works" scheme="http://tyrionyu.com/categories/works/"/>
     
     
-      <category term="画册" scheme="http://tyrionyu.com/tags/brochures/"/>
-    
       <category term="版式设计" scheme="http://tyrionyu.com/tags/layout/"/>
     
-      <category term="样本" scheme="http://tyrionyu.com/tags/sample/"/>
-    
       <category term="宣传册" scheme="http://tyrionyu.com/tags/portfolio/"/>
+    
+      <category term="画册" scheme="http://tyrionyu.com/tags/brochures/"/>
+    
+      <category term="样本" scheme="http://tyrionyu.com/tags/sample/"/>
     
   </entry>
   
@@ -317,9 +317,9 @@
     
       <category term="海报" scheme="http://tyrionyu.com/tags/poster/"/>
     
-      <category term="版式设计" scheme="http://tyrionyu.com/tags/layout/"/>
-    
       <category term="DM" scheme="http://tyrionyu.com/tags/dm/"/>
+    
+      <category term="版式设计" scheme="http://tyrionyu.com/tags/layout/"/>
     
   </entry>
   
