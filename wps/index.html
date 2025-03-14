@@ -1,11 +1,102 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>abc</title>
+    <title>WPS多维表格导航功能全解析</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            line-height: 1.6;
+            margin: 2rem;
+            background: #f5f7fa;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        .header {
+            background: #2c3e50;
+            color: white;
+            padding: 2rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+        }
+        .section {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .section:nth-child(odd) {
+            background: #f8f9fa;
+        }
+        h1 {
+            color: #3498db;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 0.5rem;
+        }
+        h2 {
+            color: #2c3e50;
+            margin-top: 0;
+        }
+        .tip {
+            background: #e8f4fc;
+            border-left: 4px solid #3498db;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+        .code {
+            background: #2c3e10;
+            color: #ecf0f1;
+            padding: 0.5rem;
+            border-radius: 4px;
+            font-family: 'Consolas', monospace;
+        }
+        .color-primary { color: #3498db; }
+        .color-accent { color: #e74c3c; }
+        .icon::before {
+            content: "➤";
+            margin-right: 0.5rem;
+            color: #3498db;
+        }
+    </style>
 </head>
 <body>
-    <p>这个是wps</p>
+    <div class="container">
+        <div class="header">
+            <h1>WPS多维表格导航功能全解析</h1>
+            <p>数据管理效率翻倍指南 | 2025年最新版</p>
+        </div>
+
+        <div class="section">
+            <h2>🚀 核心功能亮点</h2>
+            <p class="icon">左侧智能导航面板支持多视图实时联动[1](@ref)</p>
+            <p class="icon">自动化流程配置可节省50%重复操作[1](@ref)</p>
+            <p class="icon">自定义字段权限实现精细化数据管理[1](@ref)</p>
+        </div>
+
+        <div class="section" style="background: #e8f6f0;">
+            <h2 class="color-primary">🔧 操作路径示例</h2>
+            <div class="tip">
+                <div class="code">WPS Office → 新建 → 应用服务 → 多维表格</div>
+                <p>支持导入本地文件/数据库对接[1](@ref)</p>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>🎨 视觉化数据管理</h2>
+            <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+                <div style="flex:1; background: #f0f8ff; padding:1rem; border-radius:6px;">
+                    <h3>视图类型</h3>
+                    <p>▪️ 网格视图<br>▪️ 看板视图<br>▪️ 甘特图[1](@ref)</p>
+                </div>
+                <div style="flex:1; background: #fff5e6; padding:1rem; border-radius:6px;">
+                    <h3>状态显示</h3>
+                    <p>▫️ 数据唯一值<br>▫️ 时间跨度统计<br>▫️ 填写进度[1](@ref)</p>
+                </div>
+            </div>
+        </div>
+    </div>
 </body>
 </html>
