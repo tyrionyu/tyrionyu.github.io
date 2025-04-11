@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>极光导航 - 您的智能上网入口</title>
+    <style>
+        :root {
+            --primary-color: #4facfe;
+            --secondary-color: #00f2fe;
+            --text-color: #2c3e50;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'PingFang SC', system-ui;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            min-height: 100vh;
+        }
+
+        /* 增强型导航头 */
+        .master-nav {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            padding: 1rem 2rem;
+            box-shadow: 0 4px 30px rgba(79, 172, 254, 0.3);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            color: white;
+            font-size: 2.2rem;
+            font-weight: 700;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        /* 智能搜索框 */
+        .smart-search {
+            width: 400px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 30px;
+            padding: 0.8rem 1.5rem;
+            display: flex;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+
+        .smart-search input {
+            width: 100%;
+            border: none;
+            background: transparent;
+            font-size: 1.1rem;
+            padding-left: 1rem;
+        }
+
+        /* 分类导航区 */
+        .category-grid {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .category-card {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .category-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .category-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .category-icon {
+            font-size: 1.8rem;
+            margin-right: 1rem;
+            color: var(--primary-color);
+        }
+
+        /* 网址列表 */
+        .link-list {
+            list-style: none;
+        }
+
+        .link-item {
+            margin: 0.8rem 0;
+            padding: 0.8rem;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .link-item:hover {
+            background: #f8f9fa;
+        }
+
+        .link-item a {
+            color: var(--text-color);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+        }
+
+        .favicon {
+            width: 20px;
+            height: 20px;
+            margin-right: 1rem;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .nav-container {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            .smart-search {
+                width: 100%;
+            }
+            .category-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <nav class="master-nav">
+        <div class="nav-container">
+            <div class="logo">AuroraNav</div>
+            <div class="smart-search">
+                <i class="fas fa-search"></i>
+                <input type="text" placeholder="智能搜索或输入网址...">
+            </div>
+        </div>
+    </nav>
+
+    <main>
+        <div class="category-grid">
+            <!-- 设计分类 -->
+            <div class="category-card">
+                <div class="category-header">
+                    <i class="fas fa-palette category-icon"></i>
+                    <h3>创意设计</h3>
+                </div>
+                <ul class="link-list">
+                    <li class="link-item">
+                        <a href="https://www.hippter.com" target="_blank">
+                            <img src="https://www.hippter.com/favicon.ico" class="favicon">
+                            PPT资源导航
+                        </a>
+                    </li>
+                    <!-- 更多设计类网址... -->
+                </ul>
+            </div>
+
+            <!-- 开发分类 -->
+            <div class="category-card">
+                <div class="category-header">
+                    <i class="fas fa-code category-icon"></i>
+                    <h3>技术开发</h3>
+                </div>
+                <ul class="link-list">
+                    <li class="link-item">
+                        <a href="https://github.com" target="_blank">
+                            <img src="https://github.com/favicon.ico" class="favicon">
+                            GitHub
+                        </a>
+                    </li>
+                    <!-- 更多开发类网址... -->
+                </ul>
+            </div>
+
+            <!-- 其他分类区块... -->
+        </div>
+    </main>
+</body>
+</html>
