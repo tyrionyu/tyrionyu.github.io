@@ -1,0 +1,978 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>词汇卡片 - 简约单词学习应用</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #4a6fa5;
+            --secondary: #6d9dc5;
+            --accent: #f5a65b;
+            --light: #f8f9fa;
+            --dark: #343a40;
+            --gray: #e9ecef;
+            --success: #28a745;
+            --danger: #dc3545;
+            --border-radius: 12px;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            --transition: all 0.3s ease;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f0f2f5;
+            color: var(--dark);
+            line-height: 1.6;
+            display: flex;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        /* 侧边栏样式 */
+        .sidebar {
+            width: 250px;
+            background: white;
+            padding: 25px 0;
+            box-shadow: var(--shadow);
+            height: 100vh;
+            position: fixed;
+            transition: var(--transition);
+            z-index: 100;
+        }
+        
+        .logo {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 0 20px;
+        }
+        
+        .logo h1 {
+            font-size: 1.8rem;
+            color: var(--primary);
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+        
+        .logo p {
+            color: var(--secondary);
+            font-size: 0.9rem;
+            margin-top: 5px;
+        }
+        
+        .nav-links {
+            list-style: none;
+        }
+        
+        .nav-links li {
+            padding: 0 15px;
+            margin-bottom: 5px;
+        }
+        
+        .nav-links a {
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            border-radius: var(--border-radius);
+            color: var(--dark);
+            text-decoration: none;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+        
+        .nav-links a i {
+            margin-right: 12px;
+            width: 24px;
+            text-align: center;
+            font-size: 1.1rem;
+        }
+        
+        .nav-links a:hover, .nav-links a.active {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        /* 主内容区域 */
+        .main-content {
+            flex: 1;
+            margin-left: 250px;
+            padding: 30px;
+            transition: var(--transition);
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--gray);
+        }
+        
+        .header h2 {
+            font-size: 1.8rem;
+            color: var(--primary);
+            font-weight: 600;
+        }
+        
+        .search-bar {
+            position: relative;
+            width: 300px;
+        }
+        
+        .search-bar input {
+            width: 100%;
+            padding: 12px 20px 12px 45px;
+            border: 1px solid var(--gray);
+            border-radius: 30px;
+            font-size: 1rem;
+            background-color: white;
+            transition: var(--transition);
+        }
+        
+        .search-bar input:focus {
+            border-color: var(--primary);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(74, 111, 165, 0.1);
+        }
+        
+        .search-bar i {
+            position: absolute;
+            left: 18px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--secondary);
+        }
+        
+        /* 卡片容器 */
+        .card-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+        
+        /* 复习卡片 */
+        .review-section {
+            display: none;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .card-wrapper {
+            perspective: 1500px;
+            height: 400px;
+            margin: 30px 0;
+        }
+        
+        .card {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transform-style: preserve-3d;
+            transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            cursor: pointer;
+        }
+        
+        .card.flipped {
+            transform: rotateY(180deg);
+        }
+        
+        .card-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 40px;
+            border-radius: var(--border-radius);
+            background: white;
+        }
+        
+        .card-back {
+            transform: rotateY(180deg);
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+        }
+        
+        .card-word {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        
+        .card-hint {
+            font-size: 1.1rem;
+            color: rgba(255, 255, 255, 0.9);
+            margin-top: 20px;
+            text-align: center;
+        }
+        
+        .card-actions {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 40px;
+        }
+        
+        .btn {
+            padding: 12px 30px;
+            border-radius: 30px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: var(--transition);
+        }
+        
+        .btn-primary {
+            background-color: var(--success);
+            color: white;
+        }
+        
+        .btn-secondary {
+            background-color: var(--danger);
+            color: white;
+        }
+        
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 7px 14px rgba(0, 0, 0, 0.1);
+        }
+        
+        .review-stats {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+            padding: 15px;
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+        }
+        
+        /* 搜索区域 */
+        .search-section {
+            display: none;
+        }
+        
+        .search-results {
+            margin-top: 25px;
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+        
+        .result-item {
+            padding: 20px;
+            border-bottom: 1px solid var(--gray);
+            transition: var(--transition);
+        }
+        
+        .result-item:last-child {
+            border-bottom: none;
+        }
+        
+        .result-item:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .result-word {
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 8px;
+        }
+        
+        .result-definition {
+            color: var(--dark);
+        }
+        
+        /* 统计区域 */
+        .stats-section {
+            display: none;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 25px;
+            box-shadow: var(--shadow);
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin: 15px 0;
+        }
+        
+        .stat-title {
+            color: var(--secondary);
+            font-size: 1.1rem;
+        }
+        
+        .chart-container {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 25px;
+            box-shadow: var(--shadow);
+            margin-top: 25px;
+            height: 400px;
+        }
+        
+        /* 创建区域 */
+        .create-section {
+            display: none;
+        }
+        
+        .create-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+        
+        .form-container {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 25px;
+            box-shadow: var(--shadow);
+        }
+        
+        .preview-container {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 25px;
+            box-shadow: var(--shadow);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--dark);
+        }
+        
+        .form-group input, .form-group textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid var(--gray);
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+        
+        .form-group textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+        
+        .form-group input:focus, .form-group textarea:focus {
+            border-color: var(--primary);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(74, 111, 165, 0.1);
+        }
+        
+        .file-upload {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border: 2px dashed var(--gray);
+            border-radius: var(--border-radius);
+            padding: 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+            margin-top: 20px;
+        }
+        
+        .file-upload:hover {
+            border-color: var(--primary);
+            background-color: rgba(74, 111, 165, 0.05);
+        }
+        
+        .file-upload i {
+            font-size: 2.5rem;
+            color: var(--secondary);
+            margin-bottom: 15px;
+        }
+        
+        .preview-card {
+            width: 300px;
+            height: 200px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            color: white;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .preview-word {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 992px) {
+            .sidebar {
+                width: 80px;
+            }
+            
+            .sidebar .logo h1, .sidebar .logo p, .nav-links span {
+                display: none;
+            }
+            
+            .nav-links a {
+                justify-content: center;
+            }
+            
+            .nav-links a i {
+                margin-right: 0;
+                font-size: 1.4rem;
+            }
+            
+            .main-content {
+                margin-left: 80px;
+            }
+            
+            .create-container {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .card-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+            
+            .search-bar {
+                width: 100%;
+            }
+        }
+        
+        /* 工具类 */
+        .active-section {
+            display: block;
+        }
+        
+        .btn-icon {
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+            color: var(--secondary);
+            transition: var(--transition);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .btn-icon:hover {
+            background-color: rgba(109, 157, 197, 0.1);
+            color: var(--primary);
+        }
+        
+        .section-title {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            color: var(--primary);
+            font-weight: 600;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 50px 20px;
+            color: var(--secondary);
+        }
+        
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            color: var(--gray);
+        }
+    </style>
+</head>
+<body>
+    <!-- 侧边栏导航 -->
+    <div class="sidebar">
+        <div class="logo">
+            <h1>词汇卡片</h1>
+            <p>高效记忆单词工具</p>
+        </div>
+        <ul class="nav-links">
+            <li>
+                <a href="#" class="active" data-section="review-section">
+                    <i class="fas fa-sync-alt"></i>
+                    <span>复习卡片</span>
+                </a>
+            </li>
+            <li>
+                <a href="#" data-section="search-section">
+                    <i class="fas fa-search"></i>
+                    <span>搜索单词</span>
+                </a>
+            </li>
+            <li>
+                <a href="#" data-section="stats-section">
+                    <i class="fas fa-chart-line"></i>
+                    <span>学习统计</span>
+                </a>
+            </li>
+            <li>
+                <a href="#" data-section="create-section">
+                    <i class="fas fa-plus-circle"></i>
+                    <span>创建卡片</span>
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <!-- 主内容区域 -->
+    <div class="main-content">
+        <!-- 复习卡片界面 -->
+        <section id="review-section" class="review-section active-section">
+            <div class="header">
+                <h2>卡片复习</h2>
+                <div class="search-bar">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="card-search" placeholder="搜索单词...">
+                </div>
+            </div>
+            
+            <div class="card-wrapper">
+                <div class="card">
+                    <div class="card-face card-front">
+                        <div class="card-word" id="current-word">Hello</div>
+                        <div class="card-hint">点击卡片查看释义</div>
+                    </div>
+                    <div class="card-face card-back">
+                        <div class="card-word" id="current-definition">你好</div>
+                        <div class="card-hint">点击卡片返回</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card-actions">
+                <button class="btn btn-secondary" id="wrong-btn">
+                    <i class="fas fa-times"></i> 不认识
+                </button>
+                <button class="btn btn-primary" id="correct-btn">
+                    <i class="fas fa-check"></i> 认识
+                </button>
+            </div>
+            
+            <div class="review-stats">
+                <div>剩余卡片: <span id="remaining-cards">10</span></div>
+                <div>已掌握: <span id="mastered-cards">0</span></div>
+                <div>需复习: <span id="review-cards">10</span></div>
+            </div>
+        </section>
+
+        <!-- 搜索界面 -->
+        <section id="search-section" class="search-section">
+            <div class="header">
+                <h2>搜索单词</h2>
+                <div class="search-bar">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="search-input" placeholder="输入要搜索的单词...">
+                </div>
+            </div>
+            
+            <div class="search-results">
+                <div class="result-item">
+                    <div class="result-word">Hello</div>
+                    <div class="result-definition">你好，用于问候或引起注意</div>
+                </div>
+                <div class="result-item">
+                    <div class="result-word">World</div>
+                    <div class="result-definition">世界，地球</div>
+                </div>
+                <div class="result-item">
+                    <div class="result-word">Computer</div>
+                    <div class="result-definition">计算机，用于处理数据的电子设备</div>
+                </div>
+                <div class="result-item">
+                    <div class="result-word">Language</div>
+                    <div class="result-definition">语言，用于交流的系统</div>
+                </div>
+                <div class="result-item">
+                    <div class="result-word">Learn</div>
+                    <div class="result-definition">学习，获取知识或技能</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 统计界面 -->
+        <section id="stats-section" class="stats-section">
+            <div class="header">
+                <h2>学习统计</h2>
+            </div>
+            
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-title">总学习卡片</div>
+                    <div class="stat-value">42</div>
+                    <div>过去7天: +10</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-title">已掌握卡片</div>
+                    <div class="stat-value">28</div>
+                    <div>掌握率: 67%</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-title">今日复习</div>
+                    <div class="stat-value">12</div>
+                    <div>目标: 15</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-title">连续学习</div>
+                    <div class="stat-value">7</div>
+                    <div>天</div>
+                </div>
+            </div>
+            
+            <div class="chart-container">
+                <canvas id="progress-chart"></canvas>
+            </div>
+        </section>
+
+        <!-- 创建卡片界面 -->
+        <section id="create-section" class="create-section">
+            <div class="header">
+                <h2>创建新卡片</h2>
+            </div>
+            
+            <div class="create-container">
+                <div class="form-container">
+                    <h3 class="section-title">卡片内容</h3>
+                    
+                    <div class="form-group">
+                        <label for="word-input">单词</label>
+                        <input type="text" id="word-input" placeholder="输入单词">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="definition-input">释义</label>
+                        <textarea id="definition-input" placeholder="输入单词释义"></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="example-input">例句 (可选)</label>
+                        <input type="text" id="example-input" placeholder="输入例句">
+                    </div>
+                    
+                    <button class="btn btn-primary" style="width:100%; padding:14px; margin-top:10px;">
+                        <i class="fas fa-plus"></i> 添加卡片
+                    </button>
+                    
+                    <div class="file-upload">
+                        <i class="fas fa-file-import"></i>
+                        <h3>导入单词列表</h3>
+                        <p>支持CSV或TXT文件</p>
+                        <input type="file" style="display:none;">
+                    </div>
+                </div>
+                
+                <div class="preview-container">
+                    <h3 class="section-title">卡片预览</h3>
+                    
+                    <div class="preview-card">
+                        <div class="preview-word" id="preview-word">Hello</div>
+                        <div id="preview-definition">你好</div>
+                    </div>
+                    
+                    <p>点击卡片可翻转查看背面</p>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        // 预加载的卡片数据
+        const initialCards = [
+            { word: "Hello", definition: "你好", mastered: false },
+            { word: "World", definition: "世界", mastered: false },
+            { word: "Computer", definition: "计算机", mastered: false },
+            { word: "Language", definition: "语言", mastered: false },
+            { word: "Learn", definition: "学习", mastered: false },
+            { word: "Application", definition: "应用", mastered: false },
+            { word: "Development", definition: "开发", mastered: false },
+            { word: "Design", definition: "设计", mastered: false },
+            { word: "Interface", definition: "界面", mastered: false },
+            { word: "Experience", definition: "体验", mastered: false }
+        ];
+        
+        let cards = [...initialCards];
+        let currentCardIndex = 0;
+        
+        // DOM元素
+        const navLinks = document.querySelectorAll('.nav-links a');
+        const sections = document.querySelectorAll('.main-content > section');
+        const cardElement = document.querySelector('.card');
+        const currentWordElement = document.getElementById('current-word');
+        const currentDefinitionElement = document.getElementById('current-definition');
+        const remainingCardsElement = document.getElementById('remaining-cards');
+        const masteredCardsElement = document.getElementById('mastered-cards');
+        const reviewCardsElement = document.getElementById('review-cards');
+        const wrongBtn = document.getElementById('wrong-btn');
+        const correctBtn = document.getElementById('correct-btn');
+        const searchInput = document.getElementById('search-input');
+        const wordInput = document.getElementById('word-input');
+        const definitionInput = document.getElementById('definition-input');
+        const previewWord = document.getElementById('preview-word');
+        const previewDefinition = document.getElementById('preview-definition');
+        
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            // 设置导航
+            setupNavigation();
+            
+            // 初始化复习卡片
+            updateCard();
+            updateStats();
+            
+            // 卡片翻转事件
+            cardElement.addEventListener('click', flipCard);
+            
+            // 正确/错误按钮事件
+            wrongBtn.addEventListener('click', markAsWrong);
+            correctBtn.addEventListener('click', markAsCorrect);
+            
+            // 实时搜索
+            searchInput.addEventListener('input', filterSearchResults);
+            
+            // 创建卡片预览
+            wordInput.addEventListener('input', updatePreview);
+            definitionInput.addEventListener('input', updatePreview);
+            
+            // 初始化图表
+            initChart();
+        });
+        
+        // 设置导航
+        function setupNavigation() {
+            navLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    // 更新活动链接
+                    navLinks.forEach(l => l.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    // 显示对应部分
+                    const targetSection = this.getAttribute('data-section');
+                    sections.forEach(section => {
+                        section.classList.remove('active-section');
+                    });
+                    document.getElementById(targetSection).classList.add('active-section');
+                });
+            });
+        }
+        
+        // 翻转卡片
+        function flipCard() {
+            cardElement.classList.toggle('flipped');
+        }
+        
+        // 更新当前卡片
+        function updateCard() {
+            if (cards.length === 0) return;
+            
+            const currentCard = cards[currentCardIndex];
+            currentWordElement.textContent = currentCard.word;
+            currentDefinitionElement.textContent = currentCard.definition;
+        }
+        
+        // 更新统计信息
+        function updateStats() {
+            const masteredCount = cards.filter(card => card.mastered).length;
+            const remainingCount = cards.length - currentCardIndex;
+            
+            remainingCardsElement.textContent = remainingCount;
+            masteredCardsElement.textContent = masteredCount;
+            reviewCardsElement.textContent = cards.length - masteredCount;
+        }
+        
+        // 标记为错误
+        function markAsWrong() {
+            if (cards.length === 0) return;
+            
+            cards[currentCardIndex].mastered = false;
+            nextCard();
+        }
+        
+        // 标记为正确
+        function markAsCorrect() {
+            if (cards.length === 0) return;
+            
+            cards[currentCardIndex].mastered = true;
+            nextCard();
+        }
+        
+        // 下一张卡片
+        function nextCard() {
+            currentCardIndex++;
+            
+            if (currentCardIndex >= cards.length) {
+                // 复习完成
+                currentCardIndex = 0;
+                // 这里可以添加复习完成的逻辑
+            }
+            
+            updateCard();
+            updateStats();
+            
+            // 如果卡片是翻转状态，翻回来
+            if (cardElement.classList.contains('flipped')) {
+                cardElement.classList.remove('flipped');
+            }
+        }
+        
+        // 过滤搜索结果
+        function filterSearchResults() {
+            const searchTerm = searchInput.value.toLowerCase();
+            const results = document.querySelectorAll('.result-item');
+            
+            results.forEach(result => {
+                const word = result.querySelector('.result-word').textContent.toLowerCase();
+                if (word.includes(searchTerm)) {
+                    result.style.display = 'block';
+                } else {
+                    result.style.display = 'none';
+                }
+            });
+        }
+        
+        // 更新预览卡片
+        function updatePreview() {
+            previewWord.textContent = wordInput.value || "单词";
+            previewDefinition.textContent = definitionInput.value || "释义";
+        }
+        
+        // 初始化图表
+        function initChart() {
+            const ctx = document.getElementById('progress-chart').getContext('2d');
+            
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['周一', '周二', '周三', '周四', '周五', '周六', '周日'],
+                    datasets: [{
+                        label: '学习进度',
+                        data: [5, 8, 12, 6, 14, 10, 15],
+                        borderColor: '#4a6fa5',
+                        backgroundColor: 'rgba(74, 111, 165, 0.1)',
+                        borderWidth: 3,
+                        pointBackgroundColor: '#fff',
+                        pointBorderWidth: 3,
+                        pointRadius: 6,
+                        tension: 0.3,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                            padding: 12,
+                            titleFont: {
+                                size: 14
+                            },
+                            bodyFont: {
+                                size: 14
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.05)'
+                            },
+                            ticks: {
+                                stepSize: 5
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // 添加键盘导航支持
+        document.addEventListener('keydown', function(e) {
+            // 仅在复习界面响应
+            if (!document.getElementById('review-section').classList.contains('active-section')) return;
+            
+            switch(e.key) {
+                case ' ':
+                    flipCard();
+                    break;
+                case 'ArrowLeft':
+                    markAsWrong();
+                    break;
+                case 'ArrowRight':
+                    markAsCorrect();
+                    break;
+            }
+        });
+    </script>
+</body>
+</html>
