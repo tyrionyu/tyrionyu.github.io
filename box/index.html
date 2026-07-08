@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>俞征佳 · 在线包装盒 3D 样机</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app">
+    <!-- 左侧：3D 预览舞台 -->
+    <main class="stage" id="stage">
+      <div class="scene" id="scene">
+        <div class="shadow" id="shadow"></div>
+        <div class="box" id="box">
+          <div class="face" data-face="front"></div>
+          <div class="face" data-face="back"></div>
+          <div class="face" data-face="left"></div>
+          <div class="face" data-face="right"></div>
+          <div class="face" data-face="top"></div>
+          <div class="face" data-face="bottom"></div>
+        </div>
+      </div>
+      <div class="stage-hint">拖动旋转 · 自动旋转 · 重置视图</div>
+    </main>
+
+    <!-- 右侧：操作面板 -->
+    <aside class="panel">
+      <header class="brand">
+        <div class="logo">俞<span>征佳</span></div>
+        <div class="brand-sub">在线包装盒 3D 样机预览</div>
+      </header>
+
+      <section class="block">
+        <h3>尺寸 <span class="muted">(毫米 / mm)</span></h3>
+        <div class="dim-grid">
+          <label class="dim">
+            <span>长</span>
+            <input type="number" id="dimW" min="10" max="2000" step="1" value="200" />
+            <em>mm</em>
+          </label>
+          <label class="dim">
+            <span>宽</span>
+            <input type="number" id="dimD" min="10" max="2000" step="1" value="150" />
+            <em>mm</em>
+          </label>
+          <label class="dim">
+            <span>高</span>
+            <input type="number" id="dimH" min="10" max="2000" step="1" value="100" />
+            <em>mm</em>
+          </label>
+        </div>
+      </section>
+
+      <section class="block">
+        <h3>选择面</h3>
+        <div class="face-grid">
+          <button class="face-btn" data-face="front">正面</button>
+          <button class="face-btn" data-face="back">背面</button>
+          <button class="face-btn" data-face="left">左侧</button>
+          <button class="face-btn" data-face="right">右侧</button>
+          <button class="face-btn" data-face="top">顶部</button>
+          <button class="face-btn" data-face="bottom">底部</button>
+        </div>
+      </section>
+
+      <section class="block">
+        <h3>贴图 · <span id="curFaceLabel">正面</span></h3>
+        <div class="upload-zone" id="dropZone">
+          <div class="uz-inner">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            <span>拖拽图片到此处，或</span>
+            <button type="button" class="link-btn" id="pickBtn">选择图片</button>
+          </div>
+          <input type="file" id="fileInput" accept="image/jpeg,image/png,image/webp" hidden />
+        </div>
+        <button type="button" class="ghost-btn" id="removeBtn">移除当前面贴图</button>
+        <p class="hint">支持 JPG / PNG / WebP，也可直接拖拽到左侧 3D 盒子的某个面上。</p>
+      </section>
+
+      <section class="block">
+        <h3>颜色</h3>
+        <div class="color-row">
+          <label class="color-field">
+            <span>盒子底色</span>
+            <span class="swatch"><input type="color" id="baseColor" value="#e8e4dd" /></span>
+          </label>
+          <label class="color-field">
+            <span>背景色</span>
+            <span class="swatch"><input type="color" id="bgColor" value="#f5f5f3" /></span>
+          </label>
+        </div>
+      </section>
+
+      <section class="block">
+        <h3>视图</h3>
+        <div class="view-row">
+          <button type="button" class="toggle-btn" id="autoBtn">自动旋转：关</button>
+          <button type="button" class="solid-btn" id="resetBtn">重置视图</button>
+        </div>
+      </section>
+    </aside>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
