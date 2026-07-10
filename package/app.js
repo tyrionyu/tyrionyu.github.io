@@ -14,6 +14,10 @@
     right: '右侧', top: '顶部', bottom: '底部',
   };
 
+  // 各面贴图旋转角（弧度）。盒子默认 UV 使底面相对顶面翻转 180°，这里统一校正；
+  // 其余面保持 0。如需微调方向，改对应数值即可（Math.PI = 180°，Math.PI/2 = 90°）。
+  const FACE_ROT = { top: 0, bottom: Math.PI };
+
   const MM = 0.01; // 毫米 -> 场景单位
   const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 
@@ -52,6 +56,10 @@
   controls.enablePan = false;
   controls.autoRotateSpeed = 2.0;
   controls.autoRotate = false;
+
+  // —— 仅调整缩放：启用鼠标中间滚轮 / 中键缩放，其余交互保持不变 ——
+  controls.enableZoom = true;                        // 鼠标滚轮缩放
+  controls.mouseButtons.MIDDLE = THREE.MOUSE.DOLLY;  // 鼠标中键也用于缩放
 
   // ---------- 灯光 ----------
   scene.add(new THREE.AmbientLight(0xffffff, 0.55));
@@ -117,7 +125,8 @@
     controls.target.set(0, yCenter, 0);
 
     const diag = Math.sqrt(L * L + D * D + H * H) * MM;
-    controls.minDistance = diag * 1.3 + 0.5;
+    // 仅放宽滚轮 / 中键缩放的放大下限：相机可更靠近盒子（仍比盒角远 0.2，不穿模），其余交互不变
+    controls.minDistance = diag * 0.5 + 0.2;
     controls.maxDistance = diag * 9 + 5;
 
     controls.update();
@@ -161,6 +170,10 @@
       tex.generateMipmaps = false;
       tex.anisotropy = renderer.capabilities.getMaxAnisotropy();
 
+      // 顶部 / 底部贴图朝向修正：以贴图中心为轴旋转，校正盒子默认 UV 导致的翻转
+      tex.center.set(0.5, 0.5);
+      tex.rotation = FACE_ROT[face] || 0;
+
       const m = materials[FACE_INDEX[face]];
       if (m.map) m.map.dispose();
       m.map = tex;
@@ -183,7 +196,7 @@
 
   // ---------- 选中面 ----------
   function selectFace(id) {
-    if (!FACE_INDEX[id]) return;
+    if (!(id in FACE_INDEX)) return;
     state.sel = id;
     document.querySelectorAll('.face-btn').forEach((b) =>
       b.classList.toggle('active', b.dataset.face === id)

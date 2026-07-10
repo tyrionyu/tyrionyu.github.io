@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32' width='32' height='32'><rect x='2' y='2' width='28' height='28' rx='7' fill='%234f46e5'/><g fill='%23ffffff'><rect x='7' y='7' width='5' height='6' rx='1.4'/><rect x='13.5' y='7' width='5' height='6' rx='1.4'/><rect x='20' y='7' width='5' height='6' rx='1.4'/><rect x='7' y='15' width='5' height='6' rx='1.4'/><rect x='13.5' y='15' width='5' height='6' rx='1.4'/><rect x='20' y='15' width='5' height='6' rx='1.4'/></g></svg>" type="image/svg+xml">
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>材料裁切排版计算器</title>
+<style>
+  :root{
+    --bg1:#eef2f9; --bg2:#e7ecf6;
+    --panel:#ffffff;
+    --ink:#1e2533; --ink-2:#3c4658; --muted:#7b8696;
+    --line:#e7ebf2; --line-2:#d8deea;
+    --accent:#4f46e5; --accent-2:#6366f1; --accent-soft:#eef0fe;
+    --ok:#15a36b; --ok-soft:#e6f7ef;
+    --warn:#e0892b; --rot:#e0892b;
+    --sheet:#334155;
+    --piece:#4f46e5; --piece-rot:#e0892b;
+    --shadow:0 1px 2px rgba(20,30,60,.05),0 12px 32px rgba(20,30,60,.08);
+    --shadow-sm:0 1px 2px rgba(20,30,60,.06);
+    --radius:16px; --radius-sm:11px;
+    --font:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:linear-gradient(160deg,var(--bg1),var(--bg2));
+    color:var(--ink);font-family:var(--font);line-height:1.55;
+    -webkit-font-smoothing:antialiased;min-height:100vh;
+  }
+  .wrap{max-width:1180px;margin:0 auto;padding:28px 22px 64px;}
+
+  /* Header */
+  header.top{display:flex;align-items:center;gap:14px;margin-bottom:24px;}
+  .logo{
+    width:46px;height:46px;flex:none;border-radius:13px;
+    background:linear-gradient(145deg,var(--accent),var(--accent-2));
+    display:grid;place-items:center;box-shadow:0 6px 16px rgba(79,70,229,.35);
+    overflow:visible;min-width:46px;min-height:46px;
+    -webkit-print-color-adjust:exact;print-color-adjust:exact;
+  }
+  .logo svg{width:24px;height:24px;display:block;}
+  header.top h1{font-size:21px;margin:0;font-weight:750;letter-spacing:.2px;}
+  header.top p{margin:2px 0 0;color:var(--muted);font-size:13px;}
+
+  .layout{display:grid;grid-template-columns:360px 1fr;gap:22px;align-items:start;}
+  @media (max-width:900px){.layout{grid-template-columns:1fr;}}
+
+  .card{
+    background:var(--panel);border:1px solid var(--line);
+    border-radius:var(--radius);box-shadow:var(--shadow);padding:20px;
+  }
+  .card + .card{margin-top:22px;}
+
+  .sec-h{display:flex;align-items:center;gap:9px;margin:0 0 15px;font-size:14px;font-weight:700;}
+  .sec-h .ic{width:26px;height:26px;border-radius:8px;background:var(--accent-soft);
+    color:var(--accent);display:grid;place-items:center;flex:none;}
+  .sec-h .ic svg{width:15px;height:15px;}
+  .sec-h small{font-weight:500;color:var(--muted);font-size:12px;margin-left:auto;}
+
+  /* presets */
+  .presets{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:16px;}
+  .chip{
+    border:1px solid var(--line-2);background:#fbfcfe;color:var(--ink-2);
+    font-size:12px;padding:6px 11px;border-radius:999px;cursor:pointer;
+    transition:.15s;user-select:none;
+  }
+  .chip:hover{border-color:var(--accent);color:var(--accent);}
+  .chip.active{background:var(--accent);border-color:var(--accent);color:#fff;box-shadow:0 4px 10px rgba(79,70,229,.28);}
+
+  /* dimension inputs */
+  .pair{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  .field{margin-bottom:0;}
+  .field > label{display:block;font-size:12px;color:var(--muted);margin-bottom:7px;font-weight:600;}
+  .inp{position:relative;}
+  .inp input{
+    width:100%;padding:11px 38px 11px 13px;font-size:16px;font-weight:600;
+    border:1.5px solid var(--line-2);border-radius:var(--radius-sm);
+    background:#fff;color:var(--ink);outline:none;transition:.15s;font-variant-numeric:tabular-nums;
+  }
+  .inp input:focus{border-color:var(--accent);box-shadow:0 0 0 4px var(--accent-soft);}
+  .inp .u{position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:12px;color:var(--muted);font-weight:600;}
+  .inp .tag{position:absolute;left:12px;top:-8px;background:#fff;padding:0 5px;font-size:10px;color:var(--accent);font-weight:700;}
+
+  /* divider */
+  .divider{height:1px;background:var(--line);margin:20px 0;}
+
+  /* advanced rows */
+  .adv-row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:15px;}
+  .adv-row:last-child{margin-bottom:0;}
+  .adv-row .meta{display:flex;flex-direction:column;}
+  .adv-row .meta .t{font-size:13px;font-weight:600;color:var(--ink-2);}
+  .adv-row .meta .s{font-size:11px;color:var(--muted);}
+  .adv-row .val{font-size:13px;font-weight:700;color:var(--accent);min-width:54px;text-align:right;}
+
+  /* slider */
+  input[type=range]{-webkit-appearance:none;appearance:none;width:150px;height:5px;border-radius:5px;background:var(--line-2);outline:none;}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:17px;height:17px;border-radius:50%;background:var(--accent);cursor:pointer;box-shadow:0 2px 5px rgba(79,70,229,.4);border:2px solid #fff;}
+  input[type=range]::-moz-range-thumb{width:15px;height:15px;border-radius:50%;background:var(--accent);cursor:pointer;border:2px solid #fff;}
+
+  /* switch */
+  .switch{position:relative;width:46px;height:26px;flex:none;}
+  .switch input{opacity:0;width:0;height:0;}
+  .slider{position:absolute;inset:0;background:#cfd6e4;border-radius:26px;cursor:pointer;transition:.2s;}
+  .slider::before{content:"";position:absolute;width:20px;height:20px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.2s;box-shadow:0 1px 3px rgba(0,0,0,.25);}
+  .switch input:checked + .slider{background:var(--accent);}
+  .switch input:checked + .slider::before{transform:translateX(20px);}
+
+  /* unit toggle */
+  .utog{display:inline-flex;background:#f0f2f8;border-radius:9px;padding:3px;border:1px solid var(--line);}
+  .utog button{border:none;background:transparent;font-size:12px;font-weight:700;color:var(--muted);padding:5px 11px;border-radius:7px;cursor:pointer;transition:.15s;}
+  .utog button.on{background:#fff;color:var(--accent);box-shadow:var(--shadow-sm);}
+
+  /* actions */
+  .actions{display:grid;grid-template-columns:1.3fr 1fr;gap:10px;margin-top:20px;}
+  .btn{padding:12px;border:none;border-radius:11px;font-size:14px;font-weight:700;cursor:pointer;transition:.12s;display:flex;align-items:center;justify-content:center;gap:7px;}
+  .btn:active{transform:translateY(1px);}
+  .btn svg{width:16px;height:16px;}
+  .btn.primary{background:linear-gradient(145deg,var(--accent),var(--accent-2));color:#fff;box-shadow:0 8px 18px rgba(79,70,229,.32);}
+  .btn.primary:hover{filter:brightness(1.05);}
+  .btn.ghost{background:#fff;color:var(--ink-2);border:1.5px solid var(--line-2);}
+  .btn.ghost:hover{background:#f7f9fc;border-color:var(--accent);color:var(--accent);}
+
+  /* result */
+  .stats{display:grid;grid-template-columns:1.2fr 1fr 1fr;gap:14px;margin-bottom:18px;}
+  @media (max-width:520px){.stats{grid-template-columns:1fr;}}
+  .stat{background:linear-gradient(160deg,#fbfcff,#f5f7fc);border:1px solid var(--line);border-radius:14px;padding:16px;position:relative;overflow:hidden;}
+  .stat.hl{background:linear-gradient(160deg,#eafaf2,#e0f6ec);border-color:#c7ecd8;}
+  .stat .t{font-size:11px;color:var(--muted);font-weight:600;margin-bottom:6px;}
+  .stat .n{font-size:34px;font-weight:800;color:var(--accent);line-height:1;font-variant-numeric:tabular-nums;}
+  .stat.hl .n{color:var(--ok);}
+  .stat .n small{font-size:15px;font-weight:700;color:var(--muted);}
+
+  /* util bar */
+  .ubar{height:8px;border-radius:8px;background:#e3e8f1;margin-top:11px;overflow:hidden;}
+  .ubar > i{display:block;height:100%;border-radius:8px;background:linear-gradient(90deg,#15a36b,#34d399);transition:width .4s ease;}
+
+  .legend{display:flex;gap:18px;flex-wrap:wrap;margin:2px 0 14px;font-size:12px;color:var(--muted);}
+  .legend .it{display:flex;align-items:center;gap:7px;}
+  .legend .bx{width:20px;height:13px;border-radius:3px;}
+  .legend .bx.sheet{border:2.5px solid var(--sheet);background:#fff;}
+  .legend .bx.piece{border:1.6px dashed var(--piece);background:rgba(79,70,229,.07);}
+  .legend .bx.rot{border:1.6px dashed var(--piece-rot);background:rgba(224,137,43,.10);}
+
+  .stage{
+    background:repeating-linear-gradient(45deg,#fbfcfe,#fbfcfe 12px,#f6f8fc 12px,#f6f8fc 24px);
+    border:1px solid var(--line);border-radius:14px;padding:22px;
+    display:flex;justify-content:center;align-items:center;min-height:340px;
+  }
+  .stage svg{max-width:100%;height:auto;display:block;filter:drop-shadow(0 10px 22px rgba(20,30,60,.12));}
+  .sheet-rect{fill:#ffffff;stroke:var(--sheet);}
+  .piece-rect{fill:rgba(79,70,229,.07);stroke:var(--piece);stroke-dasharray:7 5;}
+  .piece-rect.rot{fill:rgba(224,137,43,.10);stroke:var(--piece-rot);stroke-dasharray:7 5;}
+  .piece-num{fill:var(--muted);font-weight:600;}
+  .crop{stroke:var(--sheet);stroke-width:1.4;stroke-linecap:round;}
+
+  .note{font-size:13px;color:var(--ink-2);margin-top:14px;line-height:1.7;}
+  .note b{color:var(--accent);}
+  .hint{margin-top:12px;font-size:12.5px;padding:11px 13px;border-radius:10px;background:var(--accent-soft);color:var(--accent);display:flex;gap:8px;align-items:flex-start;}
+  .hint svg{width:16px;height:16px;flex:none;margin-top:1px;}
+  .hint.warn{background:#fef3e6;color:var(--warn);}
+  .warnmsg{color:#d23b3b;font-size:13px;margin-top:10px;font-weight:600;}
+
+  .print-only{display:none;}
+  @page{size:A4 portrait;margin:8mm;}
+  @media print, html.printing, html.exporting{
+    body{background:#fff;}
+    .wrap{max-width:none;padding:0;margin:0 auto;}
+    .print-only{display:block;}
+    .layout{display:block;}
+    .card{border:none;box-shadow:none;padding:0;background:none;}
+    .stage{border:1px solid #aaa;}
+    .stat{border:1px solid #ccc;background:#fff !important;}
+    /* 强制彩色背景 / 图标在打印与 PDF 中完整呈现，避免图标“显示不全” */
+    .logo, .logo *, .stage, .stage *, .stat.hl, .hint, .hint.warn{
+      -webkit-print-color-adjust:exact;print-color-adjust:exact;
+    }
+  }
+  /* 打印时隐藏输入面板；导出 PDF 时保留，把左侧参数一起带进文件 */
+  @media print, html.printing{ .noprint{display:none !important;} }
+  html.exporting .noprint{display:block !important;}
+  /* 打印 / 导出测量阶段：把视口宽度限定为 A4 内容区，使单页缩放计算准确 */
+  html.printing body, html.exporting body{width:733.2px;margin:0 auto;}
+</style>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="logo">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><line x1="8.5" y1="7.5" x2="20" y2="16.5"/><line x1="8.5" y1="16.5" x2="20" y2="7.5"/></svg>
+    </div>
+    <div>
+      <h1>材料裁切排版计算器</h1>
+      <p>输入纸张与成品尺寸，自动算出最多可裁数量与最优排版，一键导出 PDF。</p>
+    </div>
+  </header>
+
+  <div class="layout">
+    <!-- ============ 输入面板 ============ -->
+    <section class="card noprint">
+      <div class="sec-h">
+        <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg></span>
+        参数设置
+        <span class="utog" id="unitTog">
+          <button data-unit="mm" class="on">mm</button>
+          <button data-unit="cm">cm</button>
+        </span>
+      </div>
+
+      <div class="field">
+        <label>原材料纸张</label>
+        <div class="presets" id="presets">
+          <span class="chip" data-w="210" data-h="297">A4</span>
+          <span class="chip" data-w="297" data-h="420">A3</span>
+          <span class="chip" data-w="889" data-h="1194">大度全开</span>
+          <span class="chip" data-w="787" data-h="1092">正度全开</span>
+        </div>
+        <div class="pair">
+          <span class="inp"><span class="tag">长</span><input id="sheetW" type="number" min="1" step="1"><span class="u" id="u1">mm</span></span>
+          <span class="inp"><span class="tag">宽</span><input id="sheetH" type="number" min="1" step="1"><span class="u" id="u2">mm</span></span>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="field">
+        <label>成品裁切尺寸</label>
+        <div class="pair">
+          <span class="inp"><span class="tag">长</span><input id="pieceW" type="number" min="1" step="1"><span class="u" id="u3">mm</span></span>
+          <span class="inp"><span class="tag">宽</span><input id="pieceH" type="number" min="1" step="1"><span class="u" id="u4">mm</span></span>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="sec-h" style="margin-bottom:14px;">
+        <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg></span>
+        高级选项
+      </div>
+
+      <div class="adv-row">
+        <div class="meta"><span class="t">切缝 / 刀口宽度</span><span class="s">每张之间的损耗</span></div>
+        <input type="range" id="kerf" min="0" max="10" step="0.5" value="0">
+        <span class="val" id="kerfVal">0 mm</span>
+      </div>
+
+      <div class="adv-row">
+        <div class="meta"><span class="t">四周留边</span><span class="s">纸张边缘不裁切区域</span></div>
+        <input type="range" id="margin" min="0" max="50" step="1" value="0">
+        <span class="val" id="marginVal">0 mm</span>
+      </div>
+
+      <div class="adv-row">
+        <div class="meta"><span class="t">允许成品旋转 90°</span><span class="s">混合摆放更省料</span></div>
+        <label class="switch"><input id="allowRot" type="checkbox" checked><span class="slider"></span></label>
+      </div>
+
+      <div class="actions">
+        <button class="btn primary" id="calcBtn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><line x1="12" y1="5" x2="12" y2="19"/></svg>
+          重新计算
+        </button>
+        <button class="btn ghost" id="resetBtn">恢复默认</button>
+      </div>
+      <button class="btn primary" id="pdfBtn" style="width:100%;margin-top:10px;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        导出 PDF
+      </button>
+      <div class="warnmsg" id="warn"></div>
+    </section>
+
+    <!-- ============ 结果区 ============ -->
+    <section class="card">
+      <div class="sec-h">
+        <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg></span>
+        排版结果
+      </div>
+
+      <div class="print-only" id="printMeta" style="margin-bottom:14px;"></div>
+
+      <div class="stats" id="stats">
+        <div class="stat hl">
+          <div class="t">可裁总数</div>
+          <div class="n" id="stCount">–<small> 张</small></div>
+        </div>
+        <div class="stat">
+          <div class="t">材料利用率</div>
+          <div class="n" id="stUse">–<small>%</small></div>
+          <div class="ubar"><i id="ubar" style="width:0%"></i></div>
+        </div>
+        <div class="stat">
+          <div class="t">排版方案</div>
+          <div class="n" id="stPlan" style="font-size:19px;line-height:1.25;">–</div>
+        </div>
+      </div>
+
+      <div class="legend">
+        <div class="it"><span class="bx sheet"></span>原材料纸张（实线）</div>
+        <div class="it"><span class="bx piece"></span>成品（虚线）</div>
+        <div class="it"><span class="bx rot"></span>旋转 90° 摆放</div>
+        <div class="it">└ 四角标记为裁切定位线</div>
+      </div>
+
+      <div class="stage" id="stage"></div>
+
+      <div class="note" id="note"></div>
+      <div class="hint" id="hint" style="display:none;"></div>
+    </section>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var $ = function(id){return document.getElementById(id);};
+
+  var unit = "mm"; // 'mm' | 'cm'
+  // 内部统一以 mm 存储；显示时按单位换算
+  function toDisp(mm){return unit==="cm" ? (mm/10) : mm;}
+  function fromDisp(v){return unit==="cm" ? (v*10) : v;}
+
+  function rawVal(id){var v=parseFloat($(id).value);return isNaN(v)?0:v;}
+  function mmVal(id){return fromDisp(rawVal(id));}
+
+  // ---- 排版算法（已验证）----
+  function gridFill(x0,y0,w,h,a,b,kerf,rot){
+    var pieces=[];
+    if(a<=0||b<=0||w<a-1e-9||h<b-1e-9) return {count:0,pieces:pieces,cols:0,rows:0};
+    var cols=Math.floor((w+kerf)/(a+kerf));
+    var rows=Math.floor((h+kerf)/(b+kerf));
+    for(var j=0;j<rows;j++) for(var i=0;i<cols;i++)
+      pieces.push({x:x0+i*(a+kerf),y:y0+j*(b+kerf),w:a,h:b,rot:rot});
+    return {count:cols*rows,pieces:pieces,cols:cols,rows:rows};
+  }
+  function bestFill(x0,y0,w,h,pw,ph,kerf,allowRot){
+    var r1=gridFill(x0,y0,w,h,pw,ph,kerf,false);
+    if(!allowRot) return r1;
+    var r2=gridFill(x0,y0,w,h,ph,pw,kerf,true);
+    return r2.count>r1.count?r2:r1;
+  }
+  function mixedLayout(Uw,Uh,a,b,pw,ph,kerf,allowRot,primaryRot){
+    var main=gridFill(0,0,Uw,Uh,a,b,kerf,primaryRot);
+    var cols=Math.floor((Uw+kerf)/(a+kerf)), rows=Math.floor((Uh+kerf)/(b+kerf));
+    var mainW=cols>0?cols*(a+kerf)-kerf:0, mainH=rows>0?rows*(b+kerf)-kerf:0;
+    var all=main.pieces.slice(), total=main.count;
+    var rx=mainW+kerf, rw=Uw-mainW-kerf;
+    if(rw>0){var right=bestFill(rx,0,rw,Uh,pw,ph,kerf,allowRot);all=all.concat(right.pieces);total+=right.count;}
+    var by=mainH+kerf, bh=Uh-mainH-kerf;
+    if(bh>0&&mainW>0){var bottom=bestFill(0,by,mainW,bh,pw,ph,kerf,allowRot);all=all.concat(bottom.pieces);total+=bottom.count;}
+    return {count:total,pieces:all};
+  }
+  function bestOf(W,H,pw,ph,kerf,allowRot){
+    var Uw=W-2*parseFloat($("margin").value?($("margin").value):0);
+    // margin 已在 compute 中处理，这里只算数量做建议对比
+    var A=mixedLayout(W,H,pw,ph,pw,ph,kerf,allowRot,false);
+    var B=allowRot?mixedLayout(W,H,ph,pw,pw,ph,kerf,allowRot,true):{count:0,pieces:[]};
+    return Math.max(A.count,B.count);
+  }
+
+  function compute(){
+    var W=mmVal("sheetW"), H=mmVal("sheetH");
+    var pw=mmVal("pieceW"), ph=mmVal("pieceH");
+    var kerf=Math.max(0,mmVal("kerf"));
+    var margin=Math.max(0,mmVal("margin"));
+    var allowRot=$("allowRot").checked;
+
+    $("warn").textContent="";
+    if(W<=0||H<=0||pw<=0||ph<=0){$("warn").textContent="请填写有效的纸张与成品尺寸（需大于 0）。";return null;}
+    var Uw=W-2*margin, Uh=H-2*margin;
+    if(Uw<=0||Uh<=0){$("warn").textContent="留边过大，超过了纸张尺寸，请减小留边。";return null;}
+
+    var cand=[mixedLayout(Uw,Uh,pw,ph,pw,ph,kerf,allowRot,false)];
+    if(allowRot) cand.push(mixedLayout(Uw,Uh,ph,pw,pw,ph,kerf,allowRot,true));
+    var best=cand[0];
+    for(var i=1;i<cand.length;i++) if(cand[i].count>best.count) best=cand[i];
+
+    if(margin>0) best.pieces.forEach(function(p){p.x+=margin;p.y+=margin;});
+
+    var sheetArea=W*H, usedArea=best.count*pw*ph;
+    var util=sheetArea>0?(usedArea/sheetArea*100):0;
+    var normal=0,rotated=0; best.pieces.forEach(function(p){p.rot?rotated++:normal++;});
+
+    // 旋转收益建议：对比「强制不旋转」与当前是否开启
+    var noRotCount=mixedLayout(Uw,Uh,pw,ph,pw,ph,kerf,false,false).count;
+    var rotBestCount=mixedLayout(Uw,Uh,ph,pw,pw,ph,kerf,true,true).count;
+    var rotGain=best.count-noRotCount;
+
+    return {W:W,H:H,pw:pw,ph:ph,kerf:kerf,margin:margin,allowRot:allowRot,
+      count:best.count,util:util,pieces:best.pieces,normal:normal,rotated:rotated,
+      rotGain:rotGain,noRotCount:noRotCount,rotBestCount:rotBestCount};
+  }
+
+  function render(res){
+    if(!res) return;
+    $("stCount").innerHTML=res.count+'<small> 张</small>';
+    $("stUse").innerHTML=res.util.toFixed(1)+'<small>%</small>';
+    $("ubar").style.width=Math.min(100,res.util).toFixed(1)+"%";
+    var plan=res.rotated>0?(res.normal+" 正向 · "+res.rotated+" 旋转") : "全部正向摆放";
+    $("stPlan").textContent=plan;
+
+    var waste=(100-res.util).toFixed(1);
+    $("note").innerHTML="原材料 <b>"+toDisp(res.W)+"×"+toDisp(res.H)+"</b> "+unit+
+      "，成品 <b>"+toDisp(res.pw)+"×"+toDisp(res.ph)+"</b> "+unit+
+      (res.kerf>0?("，切缝 "+toDisp(res.kerf)+unit):"")+
+      (res.margin>0?("，留边 "+toDisp(res.margin)+unit):"")+
+      "。共可裁 <b>"+res.count+"</b> 张，利用率 <b>"+res.util.toFixed(1)+"%</b>，余料约 <b>"+waste+"%</b>。";
+
+    // 旋转建议
+    var hint=$("hint");
+    if(res.allowRot && res.rotGain>0){
+      hint.className="hint";
+      hint.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg><span>已启用旋转摆放，比全部正向多裁出 <b>'+res.rotGain+'</b> 张，排版更省料。</span>';
+      hint.style.display="flex";
+    } else if(!res.allowRot && res.rotBestCount > res.noRotCount){
+      hint.className="hint warn";
+      hint.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4"/><path d="M12 17h.01"/></svg><span>提示：开启「允许旋转 90°」可进一步提高利用率，建议尝试。</span>';
+      hint.style.display="flex";
+    } else {
+      hint.style.display="none";
+    }
+
+    $("printMeta").innerHTML="<div style='font-size:13px;color:#333;'><b>裁切方案</b> ｜ 纸张 "+toDisp(res.W)+"×"+toDisp(res.H)+unit+
+      " ｜ 成品 "+toDisp(res.pw)+"×"+toDisp(res.ph)+unit+
+      (res.kerf>0?(" ｜ 切缝 "+toDisp(res.kerf)+unit):"")+
+      (res.margin>0?(" ｜ 留边 "+toDisp(res.margin)+unit):"")+
+      " ｜ 可裁 "+res.count+" 张 ｜ 利用率 "+res.util.toFixed(1)+"%</div>";
+
+    drawSVG(res);
+  }
+
+  function drawSVG(res){
+    var maxDim=660, pad=20, t=14; // t=裁切角标长度
+    var scale=maxDim/Math.max(res.W,res.H);
+    var sw=res.W*scale, sh=res.H*scale;
+    var vbW=sw+pad*2, vbH=sh+pad*2;
+    var svg='<svg viewBox="0 0 '+vbW.toFixed(1)+' '+vbH.toFixed(1)+'" width="'+vbW.toFixed(0)+'" xmlns="http://www.w3.org/2000/svg">';
+    // 外框
+    svg+='<rect class="sheet-rect" x="'+pad+'" y="'+pad+'" width="'+sw.toFixed(1)+'" height="'+sh.toFixed(1)+'" stroke-width="2.5" rx="3"/>';
+    // 四角裁切定位线
+    var c=pad, L=sw+pad, T=pad, B=sh+pad;
+    [[c,c,1,1],[L,c,-1,1],[c,B,1,-1],[L,B,-1,-1]].forEach(function(k){
+      svg+='<line class="crop" x1="'+(k[0])+'" y1="'+(k[1]+k[3]*t)+'" x2="'+k[0]+'" y2="'+k[1]+'"/>';
+      svg+='<line class="crop" x1="'+(k[0]+k[2]*t)+'" y1="'+k[1]+'" x2="'+k[0]+'" y2="'+k[1]+'"/>';
+    });
+    // 成品
+    var showNum=res.count<=180;
+    var fs=Math.max(8,Math.min(14, Math.min(res.pw,res.ph)*scale*0.28));
+    res.pieces.forEach(function(p,idx){
+      var x=pad+p.x*scale, y=pad+p.y*scale, w=p.w*scale, h=p.h*scale;
+      svg+='<rect class="piece-rect'+(p.rot?' rot':'')+'" x="'+x.toFixed(1)+'" y="'+y.toFixed(1)+'" width="'+w.toFixed(1)+'" height="'+h.toFixed(1)+'" stroke-width="1.3"/>';
+      if(showNum) svg+='<text class="piece-num" x="'+(x+w/2).toFixed(1)+'" y="'+(y+h/2).toFixed(1)+'" font-size="'+fs.toFixed(1)+'" text-anchor="middle" dominant-baseline="central">'+(idx+1)+'</text>';
+    });
+    svg+='</svg>';
+    $("stage").innerHTML=svg;
+  }
+
+  // ---- 实时计算（防抖）----
+  var t=null;
+  function schedule(){clearTimeout(t);t=setTimeout(run,180);}
+  function run(){var r=compute();if(r) render(r);}
+
+  // ---- 单位切换 ----
+  function applyUnit(){
+    ["u1","u2","u3","u4"].forEach(function(id){$(id).textContent=unit;});
+    var f=unit==="cm"?10:1;
+    // 重新展示当前内部 mm 值
+    ["sheetW","sheetH","pieceW","pieceH"].forEach(function(id){
+      var mm=parseFloat($(id).dataset.mm||"0");
+      $(id).value = mm>0 ? (mm/f) : "";
+    });
+    $("kerfVal").textContent=(unit==="cm"?((parseFloat($("kerf").value)/10).toFixed(1)):parseFloat($("kerf").value).toFixed(1))+" "+unit;
+    $("marginVal").textContent=(unit==="cm"?((parseFloat($("margin").value)/10).toFixed(1)):parseFloat($("margin").value).toFixed(1))+" "+unit;
+  }
+  // 把"显示值→内部mm"并暂存 dataset.mm
+  function syncMM(id){
+    var disp=parseFloat($(id).value);
+    if(isNaN(disp)){$(id).dataset.mm="0";return;}
+    $(id).dataset.mm=fromDisp(disp);
+  }
+
+  $("unitTog").addEventListener("click",function(e){
+    var b=e.target.closest("button"); if(!b) return;
+    unit=b.dataset.unit;
+    [].forEach.call(this.children,function(c){c.classList.toggle("on",c===b);});
+    // 先把当前显示值转成 mm 暂存，再按新单位展示
+    ["sheetW","sheetH","pieceW","pieceH"].forEach(function(id){syncMM(id);});
+    applyUnit();
+    run();
+  });
+
+  // 输入事件
+  ["sheetW","sheetH","pieceW","pieceH"].forEach(function(id){
+    $(id).addEventListener("input",function(){
+      syncMM(id);
+      // 取消纸张预设高亮
+      [].forEach.call($("presets").children,function(c){c.classList.remove("active");});
+      schedule();
+    });
+  });
+  $("kerf").addEventListener("input",function(){
+    $("kerfVal").textContent=(unit==="cm"?((parseFloat(this.value)/10).toFixed(1)):parseFloat(this.value).toFixed(1))+" "+unit;
+    schedule();
+  });
+  $("margin").addEventListener("input",function(){
+    $("marginVal").textContent=(unit==="cm"?((parseFloat(this.value)/10).toFixed(1)):parseFloat(this.value).toFixed(1))+" "+unit;
+    schedule();
+  });
+  $("allowRot").addEventListener("change",run);
+  $("calcBtn").addEventListener("click",run);
+  $("pdfBtn").addEventListener("click", exportPDF);
+
+  // ---- 直接导出 PDF 文件（单页、含中文、图标完整）----
+  function exportPDF(){
+    // 库未加载（如离线）时回退到浏览器打印“另存为 PDF”
+    if(typeof html2canvas==="undefined" || !window.jspdf || !window.jspdf.jsPDF){
+      window.print();
+      return;
+    }
+    var root=document.documentElement;
+    root.classList.add("exporting"); // 套用单页布局并把左侧参数面板一起导出
+    var src=document.querySelector(".wrap");
+    var host=document.createElement("div");
+    host.style.cssText="position:fixed;left:-10000px;top:0;width:733.2px;";
+    host.appendChild(src.cloneNode(true));
+    document.body.appendChild(host);
+    var target=host.firstChild;
+
+    function cleanup(){
+      if(host.parentNode) host.parentNode.removeChild(host);
+      root.classList.remove("exporting");
+    }
+
+    html2canvas(target,{scale:2,backgroundColor:"#ffffff",logging:false,windowWidth:733.2})
+      .then(function(canvas){
+        cleanup();
+        var img=canvas.toDataURL("image/jpeg",0.95);
+        var PDF=window.jspdf.jsPDF;
+        var pdf=new PDF({unit:"mm",format:"a4",orientation:"portrait"});
+        var pw=210,ph=297,m=8,availW=pw-2*m,availH=ph-2*m;
+        var pxPerMm=(96/25.4)*2; // scale=2、96dpi 下每毫米像素数
+        var imgWmm=canvas.width/pxPerMm, imgHmm=canvas.height/pxPerMm;
+        var s=Math.min(availW/imgWmm,availH/imgHmm,1); // 等比缩放，确保单页
+        var w=imgWmm*s, h=imgHmm*s;
+        var x=(pw-w)/2, y=m+(availH-h)/2; // 居中放置
+        pdf.addImage(img,"JPEG",x,y,w,h);
+        pdf.save("裁切排版方案.pdf");
+      })
+      .catch(function(){ cleanup(); window.print(); });
+  }
+
+  // ---- 单页打印：自动缩放使全部内容压缩至一页 ----
+  var MM_PX = 96/25.4; // 打印分辨率 96dpi 下每毫米对应的像素数
+  function fitToPage(){
+    var root=document.documentElement;
+    root.classList.add("printing");
+    var wrap=document.querySelector(".wrap");
+    // 先复位，再测量自然尺寸
+    wrap.style.transform="";
+    wrap.style.transformOrigin="";
+    wrap.style.marginBottom="";
+    void wrap.offsetWidth; // 强制重排，使 .printing 布局生效
+    var r=wrap.getBoundingClientRect();
+    var w=r.width, h=r.height;
+    var marginMM=8; // 须与 @page margin 一致
+    var availW=(210-2*marginMM)*MM_PX;
+    var availH=(297-2*marginMM)*MM_PX;
+    var scale=Math.min(availW/w, availH/h, 1);
+    if(scale<1){
+      wrap.style.transformOrigin="top center";
+      wrap.style.transform="scale("+scale+")";
+      // 抵消 transform 不改变布局盒高度带来的多余空间，避免生成第二页
+      wrap.style.marginBottom=(-(h-h*scale))+"px";
+    }
+  }
+  function resetFit(){
+    document.documentElement.classList.remove("printing");
+    var wrap=document.querySelector(".wrap");
+    wrap.style.transform="";
+    wrap.style.transformOrigin="";
+    wrap.style.marginBottom="";
+  }
+  window.addEventListener("beforeprint",fitToPage);
+  window.addEventListener("afterprint",resetFit);
+
+  // 纸张预设
+  $("presets").addEventListener("click",function(e){
+    var c=e.target.closest(".chip"); if(!c) return;
+    [].forEach.call(this.children,function(x){x.classList.toggle("active",x===c);});
+    var w=parseFloat(c.dataset.w), h=parseFloat(c.dataset.h); // 预设以 mm 计
+    $("sheetW").dataset.mm=w; $("sheetH").dataset.mm=h;
+    $("sheetW").value=toDisp(w); $("sheetH").value=toDisp(h);
+    run();
+  });
+
+  // 恢复默认
+  $("resetBtn").addEventListener("click",function(){
+    unit="mm";[].forEach.call($("unitTog").children,function(c){c.classList.toggle("on",c.dataset.unit==="mm");});
+    $("sheetW").dataset.mm=1000; $("sheetH").dataset.mm=700;
+    $("pieceW").dataset.mm=210; $("pieceH").dataset.mm=150;
+    ["sheetW","sheetH","pieceW","pieceH"].forEach(function(id){$(id).value=toDisp(parseFloat($(id).dataset.mm));});
+    $("kerf").value=0; $("margin").value=0; $("allowRot").checked=true;
+    $("kerfVal").textContent="0 mm"; $("marginVal").textContent="0 mm";
+    [].forEach.call($("presets").children,function(c){c.classList.toggle("active",c.dataset.w==="1000");});
+    run();
+  });
+
+  // 初始化
+  ["sheetW","sheetH","pieceW","pieceH"].forEach(function(id){
+    $(id).dataset.mm = id==="sheetW"?1000 : id==="sheetH"?700 : id==="pieceW"?210 : 150;
+    $(id).value=$(id).dataset.mm;
+  });
+  [].forEach.call($("presets").children,function(c){c.classList.toggle("active",c.dataset.w==="1000");});
+  run();
+})();
+</script>
+</body>
+</html>
