@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>报价单生成器</title>
+<style>
+  * { box-sizing: border-box; }
+  :root {
+    --bg: #f4f5f7; --panel: #ffffff; --ink: #1f2329; --muted: #8a8f99;
+    --line: #e5e6eb; --brand: #2f6fed; --brand-d: #1d4fd0;
+    --warn: #d54941; --ok: #2ba471;
+  }
+  html, body { margin: 0; height: 100%; }
+  body {
+    font-family: "PingFang SC", "Microsoft YaHei", system-ui, -apple-system, sans-serif;
+    background: var(--bg); color: var(--ink); font-size: 13px; line-height: 1.5;
+  }
+  header {
+    position: sticky; top: 0; z-index: 10; display: flex; align-items: center;
+    justify-content: space-between; gap: 12px; padding: 10px 18px;
+    background: #fff; border-bottom: 1px solid var(--line);
+  }
+  header h1 { font-size: 16px; margin: 0; font-weight: 600; }
+  .toolbar { display: flex; gap: 8px; flex-wrap: wrap; }
+  button {
+    font-family: inherit; font-size: 13px; cursor: pointer; border: 1px solid var(--line);
+    background: #fff; color: var(--ink); padding: 7px 14px; border-radius: 6px;
+  }
+  button:hover { border-color: var(--brand); color: var(--brand); }
+  button.primary { background: var(--brand); border-color: var(--brand); color: #fff; }
+  button.primary:hover { background: var(--brand-d); color: #fff; }
+  .del-comp { color: var(--warn); border-color: #f3c2c0; padding: 3px 12px; font-size: 12px; }
+  .del-comp:hover { background: #fdeceb; color: var(--warn); }
+  main { display: flex; height: calc(100vh - 53px); }
+  .preview { flex: 1 1 54%; overflow: auto; padding: 22px; }
+  .panel {
+    flex: 1 1 46%; max-width: 560px; overflow: auto; padding: 18px;
+    border-left: 1px solid var(--line); background: var(--bg);
+  }
+  /* ---- preview doc ---- */
+  .doc { background: #fff; padding: 32px 36px; border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,.08); max-width: 820px; margin: 0 auto; }
+  .doc-head { border-bottom: 2px solid var(--ink); padding-bottom: 12px; margin-bottom: 18px; }
+  .doc-head h1 { margin: 0 0 10px; font-size: 24px; text-align: center; letter-spacing: 4px; }
+  .doc-meta { display: flex; flex-wrap: wrap; gap: 6px 28px; color: #444; font-size: 13px; }
+  .doc-meta span { color: var(--muted); }
+  .prod-block { margin-bottom: 22px; }
+  .prod-block h2 { font-size: 16px; margin: 0 0 8px; padding-left: 8px; border-left: 4px solid var(--brand); }
+  table { width: 100%; border-collapse: collapse; margin: 8px 0; font-size: 12.5px; }
+  table.cfg th, table.cfg td { border: 1px solid var(--line); padding: 6px 10px; text-align: left; vertical-align: top; }
+  table.cfg th { background: #fafbfc; width: 92px; color: #555; font-weight: 600; white-space: nowrap; }
+  table.fee th, table.fee td { border: 1px solid var(--line); padding: 5px 8px; text-align: center; }
+  table.fee th { background: #f2f5ff; font-weight: 600; }
+  table.fee td:first-child, table.fee td:nth-child(2) { text-align: left; }
+  .prod-sum { display: flex; flex-wrap: wrap; gap: 8px 22px; justify-content: flex-end; margin-top: 8px; font-size: 13px; }
+  .prod-sum .strong { font-weight: 700; color: var(--brand-d); }
+  .grand { text-align: right; font-size: 17px; margin-top: 14px; padding-top: 12px; border-top: 2px solid var(--ink); }
+  .grand b { color: var(--warn); }
+  /* ---- panel ---- */
+  .panel-section { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 14px; margin-bottom: 14px; }
+  .panel-section h3 { margin: 0 0 10px; font-size: 14px; }
+  .sub-title { font-weight: 600; margin: 12px 0 6px; padding: 3px 0; border-bottom: 1px dashed var(--line); color: #333; }
+  .proc-title { font-size: 12px; color: var(--muted); margin: 8px 0 4px; }
+  .field-row { display: flex; gap: 10px; flex-wrap: wrap; }
+  .field { display: flex; flex-direction: column; gap: 3px; flex: 1 1 120px; margin-bottom: 8px; }
+  .field .lbl { font-size: 11.5px; color: var(--muted); }
+  .field input, .field select {
+    font-family: inherit; font-size: 13px; padding: 6px 8px; border: 1px solid var(--line);
+    border-radius: 5px; background: #fff; width: 100%;
+  }
+  .field input:focus, .field select:focus { outline: none; border-color: var(--brand); }
+  .prod-card { border: 1px solid var(--line); border-radius: 8px; padding: 12px; margin-bottom: 12px; background: #fcfcfd; }
+  .prod-card-head { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+  .prod-name { flex: 1; font-weight: 600; font-size: 14px; padding: 6px 8px; border: 1px solid var(--line); border-radius: 5px; }
+  .comp { border: 1px solid var(--line); border-radius: 7px; margin-bottom: 10px; overflow: hidden; }
+  .comp-head { background: #f2f5ff; padding: 8px 12px; display: flex; align-items: center; justify-content: space-between; font-weight: 600; }
+  .comp-title { font-weight: 600; }
+  .comp-body { padding: 10px 12px; background: #fff; }
+  .proc-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding: 3px 0; }
+  .proc-row label { display: flex; align-items: center; gap: 5px; }
+  .proc-row .sides { font-size: 12px; color: #555; }
+  .proc-row .sides input { width: 64px; padding: 4px 6px; border: 1px solid var(--line); border-radius: 4px; }
+  .proc-row.locked { font-size: 12px; color: var(--ok); background: #eefaf3; padding: 6px 8px; border-radius: 5px; }
+  .acc { border: 1px dashed var(--line); border-radius: 6px; padding: 8px; margin-bottom: 8px; }
+  .acc-head { display: flex; align-items: center; gap: 6px; font-weight: 600; cursor: pointer; }
+  .acc-body { margin-top: 8px; }
+  .sub { background: #fafbff; border: 1px solid var(--line); border-radius: 6px; padding: 8px; margin: 6px 0; }
+  table.cat { width: 100%; border-collapse: collapse; font-size: 12px; }
+  table.cat th, table.cat td { border: 1px solid var(--line); padding: 5px 6px; text-align: center; }
+  table.cat th { background: #f2f5ff; }
+  table.cat input { width: 70px; padding: 4px 5px; border: 1px solid var(--line); border-radius: 4px; font-family: inherit; font-size: 12px; }
+  table.cat td:first-child { font-weight: 600; }
+  .add-btn { width: 100%; border-style: dashed; color: var(--brand); padding: 10px; }
+  .muted { color: var(--muted); font-size: 11px; }
+  @media (max-width: 900px) { main { flex-direction: column; height: auto; } .panel { max-width: none; border-left: none; border-top: 1px solid var(--line); } }
+  @media print {
+    header, .panel { display: none !important; }
+    body { background: #fff; }
+    main { display: block; height: auto; }
+    .preview { padding: 0; overflow: visible; }
+    .doc { box-shadow: none; border-radius: 0; max-width: none; padding: 0; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>报价单生成器</h1>
+  <div class="toolbar">
+    <button id="addProduct" class="primary">+ 添加商品</button>
+    <button id="exportExcel">导出 Excel</button>
+    <button id="exportPdf">导出 PDF</button>
+  </div>
+</header>
+<main>
+  <section id="preview" class="preview"></section>
+  <aside id="panel" class="panel"></aside>
+</main>
+
+<script>
+"use strict";
+
+/* ---------- 常量 ---------- */
+const PART_PROCESSES = {
+  handbag: ["caixi", "siyin", "tangjin"],
+  giftbox: ["caixi", "siyin", "tangjin", "lengtang"]
+};
+
+/* ---------- 状态 ---------- */
+function createProduct(name) {
+  return {
+    name: name,
+    quickFill: "",
+    handbag: {
+      enabled: true, model: "", color: "", unitPrice: 0, orderQty: 10,
+      processes: {
+        caixi: { selected: true, sides: 2 }, siyin: { selected: false, sides: 1 }, tangjin: { selected: false, sides: 1 }
+      }
+    },
+    giftbox: {
+      enabled: true, model: "", color: "", unitPrice: 0, orderQty: 10,
+      processes: {
+        caixi: { selected: true, sides: 2 }, siyin: { selected: false, sides: 1 },
+        tangjin: { selected: false, sides: 1 }, lengtang: { selected: false, sides: 1 }
+      }
+    },
+    lining: {
+      enabled: true, unitPrice: 0, orderQty: 100, type: "default",
+      defaultLining: { quantity: 1, type: "", color: "" },
+      customLining: { quantity: 1, material: "", color: "" }
+    },
+    accessories: {
+      blister:   { enabled: false, quantity: 0, color: "", unitPrice: 0 },
+      combo:     { enabled: false, quantity: 1, item: "", color: "", unitPrice: 0 },
+      titlePage: { enabled: false, quantity: 0, material: "稻香纸", unitPrice: 0 },
+      sticker:   { enabled: false, quantity: 0, material: "书写纸", unitPrice: 0 }
+    }
+  };
+}
+
+const state = {
+  quote: { customer: "", no: "", date: todayStr() },
+  processCatalog: {
+    caixi:    { name: "彩印", method: "每面", unitPrice: 1, feeName: "上机费", feeAmount: 10 },
+    siyin:    { name: "丝印", method: "每面", unitPrice: 1, feeName: "版费",   feeAmount: 10 },
+    lengtang: { name: "冷烫", method: "每面", unitPrice: 1, feeName: "版费",   feeAmount: 10 },
+    tangjin:  { name: "烫金", method: "每面", unitPrice: 1, feeName: "版费",   feeAmount: 10 },
+    dingnei:  { name: "定制内衬", method: "每个", unitPrice: 1, feeName: "版费", feeAmount: 10 }
+  },
+  products: [ createProduct("产品1") ]
+};
+
+/* ---------- 工具 ---------- */
+function todayStr() {
+  const d = new Date(), p = n => String(n).padStart(2, "0");
+  return d.getFullYear() + "-" + p(d.getMonth() + 1) + "-" + p(d.getDate());
+}
+function setByPath(obj, path, val) {
+  const parts = path.split("."); let o = obj;
+  for (let i = 0; i < parts.length - 1; i++) { if (o[parts[i]] === undefined) o[parts[i]] = {}; o = o[parts[i]]; }
+  o[parts[parts.length - 1]] = val;
+}
+function getByPath(obj, path) { return path.split(".").reduce((o, k) => (o ? o[k] : undefined), obj); }
+function esc(s) {
+  return (s === undefined || s === null) ? "" : String(s)
+    .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+}
+function money(n) {
+  return "¥" + (Math.round((n || 0) * 100) / 100).toLocaleString("zh-CN", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+function download(blob, filename) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = filename; document.body.appendChild(a); a.click();
+  setTimeout(() => { URL.revokeObjectURL(url); a.remove(); }, 100);
+}
+
+/* ---------- 批量录入解析 ---------- */
+function applyQuickFill(pi, raw) {
+  if (raw === undefined || raw === null) return;
+  const s = String(raw).replace(/[－—–]/g, "-");      // 兼容全角/长横线
+  const parts = s.split("-").map(x => x.trim());
+  if (parts.length < 5 || parts.slice(0, 5).some(x => x === "")) return; // 必须 5 段且非空
+  const model = parts[0], color = parts[1], jiGe = parts[2], dongXi = parts[3], orderQty = parts[4];
+  const p = state.products[pi];
+  const oq = parseInt(orderQty, 10) || 0;
+  // 手提袋：型号 / 颜色 / 下单数量
+  p.handbag.model = model; p.handbag.color = color; p.handbag.orderQty = oq;
+  // 礼盒：型号 / 颜色 / 下单数量
+  p.giftbox.model = model; p.giftbox.color = color; p.giftbox.orderQty = oq;
+  // 内衬：下单数量（默认/定制均写）；默认内衬再写 数量 与 内衬种类
+  p.lining.orderQty = oq;
+  if (p.lining.type === "default") {
+    p.lining.defaultLining.quantity = parseInt(jiGe, 10) || 0;
+    p.lining.defaultLining.type = dongXi;
+  }
+}
+
+/* ---------- 计算 ---------- */
+function calcProcessFee(key, count, orderQty, ctx) {
+  const p = state.processCatalog[key];
+  const unitPrice = Number(p.unitPrice) || 0;
+  const feeAmount = Number(p.feeAmount) || 0;
+  const variable = (count || 0) * unitPrice * (orderQty || 0);
+  let fixed = 0;
+  // 多个部位同一种工艺时，只收一次工艺固定费用（上机费/版费）
+  if (ctx && !ctx.chargedCrafts.has(key)) {
+    fixed = feeAmount;
+    ctx.chargedCrafts.add(key);
+  }
+  return { variable: variable, fixed: fixed, total: variable + fixed };
+}
+function calcProduct(p, pi, ctx) {
+  const compRows = [];
+  const processRows = [];
+  function pushProc(part, key, count, orderQty) {
+    const fee = calcProcessFee(key, count, orderQty, ctx);
+    const row = Object.assign({ part: part, count: count }, state.processCatalog[key], fee);
+    row.feeAmount = fee.fixed;
+    processRows.push(row);
+  }
+
+  if (p.handbag.enabled) {
+    const oq = Number(p.handbag.orderQty) || 0;
+    const up = Number(p.handbag.unitPrice) || 0;
+    compRows.push({ label: "手提袋", unitPrice: up, orderQty: oq, amount: up * oq });
+    PART_PROCESSES.handbag.forEach(k => {
+      const ps = p.handbag.processes[k];
+      if (ps.selected) pushProc("手提袋", k, ps.sides, oq);
+    });
+  }
+  if (p.giftbox.enabled) {
+    const oq = Number(p.giftbox.orderQty) || 0;
+    const up = Number(p.giftbox.unitPrice) || 0;
+    compRows.push({ label: "礼盒", unitPrice: up, orderQty: oq, amount: up * oq });
+    PART_PROCESSES.giftbox.forEach(k => {
+      const ps = p.giftbox.processes[k];
+      if (ps.selected) pushProc("礼盒", k, ps.sides, oq);
+    });
+  }
+  if (p.lining.enabled) {
+    const oq = Number(p.lining.orderQty) || 0;
+    const up = Number(p.lining.unitPrice) || 0;
+    compRows.push({ label: "内衬", unitPrice: up, orderQty: oq, amount: up * oq });
+    if (p.lining.type === "custom") {
+      pushProc("定制内衬", "dingnei", p.lining.customLining.quantity, oq);
+    }
+  }
+
+  const productAmount = compRows.reduce((s, r) => s + r.amount, 0);
+  const processAmount = processRows.reduce((s, r) => s + r.total, 0);
+
+  const accessoryRows = [];
+  const A = p.accessories;
+  if (A.blister.enabled)   accessoryRows.push({ name: "泡袋",   detail: A.blister.color,     qty: A.blister.quantity,   unitPrice: A.blister.unitPrice,   amount: (Number(A.blister.quantity)||0) * (Number(A.blister.unitPrice)||0) });
+  if (A.titlePage.enabled) accessoryRows.push({ name: "扉页",   detail: A.titlePage.material, qty: A.titlePage.quantity, unitPrice: A.titlePage.unitPrice, amount: (Number(A.titlePage.quantity)||0) * (Number(A.titlePage.unitPrice)||0) });
+  if (A.sticker.enabled)   accessoryRows.push({ name: "不干胶", detail: A.sticker.material,   qty: A.sticker.quantity,   unitPrice: A.sticker.unitPrice,   amount: (Number(A.sticker.quantity)||0) * (Number(A.sticker.unitPrice)||0) });
+  if (A.combo.enabled)     accessoryRows.push({ name: "其它", detail: [A.combo.item, A.combo.color].filter(v => v).join(" - "), qty: A.combo.quantity,     unitPrice: A.combo.unitPrice,     amount: (Number(A.combo.quantity)||0) * (Number(A.combo.unitPrice)||0) });
+  const accessoryAmount = accessoryRows.reduce((s, r) => s + r.amount, 0);
+
+  return { compRows, productAmount, processRows, processAmount, accessoryRows, accessoryAmount, total: productAmount + processAmount + accessoryAmount };
+}
+
+/* ---------- 全单计算（固定费用按工艺只收一次） ---------- */
+function calcAllProducts() {
+  const ctx = { chargedCrafts: new Set() };
+  return state.products.map((p, i) => calcProduct(p, i, ctx));
+}
+
+/* ---------- 预览渲染 ---------- */
+function renderPreview() {
+  const q = state.quote;
+  let html = '<div class="doc"><div class="doc-head"><h1>报 价 单</h1><div class="doc-meta">'
+    + '<div><span>客户：</span>' + (esc(q.customer) || "—") + '</div>'
+    + '<div><span>单号：</span>' + (esc(q.no) || "—") + '</div>'
+    + '<div><span>日期：</span>' + (esc(q.date) || "—") + '</div></div></div>';
+
+  const all = calcAllProducts();
+  all.forEach((c, pi) => {
+    const p = state.products[pi];
+    html += '<div class="prod-block"><h2>' + (esc(p.name) || ("产品" + (pi + 1))) + '</h2>';
+    html += '<table class="cfg">';
+
+    if (p.handbag.enabled) {
+      html += '<tr><th>手提袋</th><td>型号：' + (esc(p.handbag.model) || "—") + '　颜色：' + (esc(p.handbag.color) || "—")
+        + '　单价：' + money(p.handbag.unitPrice) + '　数量：' + p.handbag.orderQty + '</td></tr>';
+    }
+    if (p.giftbox.enabled) {
+      html += '<tr><th>礼盒</th><td>型号：' + (esc(p.giftbox.model) || "—") + '　颜色：' + (esc(p.giftbox.color) || "—")
+        + '　单价：' + money(p.giftbox.unitPrice) + '　数量：' + p.giftbox.orderQty + '</td></tr>';
+    }
+    if (p.lining.enabled) {
+      if (p.lining.type === "default") {
+        const d = p.lining.defaultLining;
+        html += '<tr><th>内衬</th><td>默认内衬　内衬数量：' + (d.quantity || "—") + '　种类：' + (esc(d.type) || "—") + '　颜色：' + (esc(d.color) || "—")
+          + '　单价：' + money(p.lining.unitPrice) + '　数量：' + p.lining.orderQty + '</td></tr>';
+      } else {
+        const cu = p.lining.customLining;
+        html += '<tr><th>内衬</th><td>定制内衬　内衬数量：' + (cu.quantity || "—") + '　材质：' + (esc(cu.material) || "—") + '　颜色：' + (esc(cu.color) || "—")
+          + '　单价：' + money(p.lining.unitPrice) + '　数量：' + p.lining.orderQty + '</td></tr>';
+      }
+    }
+    if (c.accessoryRows.length) {
+      const acc = c.accessoryRows.map(r => r.name + "(" + r.qty + "×" + money(r.unitPrice) + ")").join("、");
+      html += '<tr><th>配件</th><td>' + acc + '</td></tr>';
+    }
+    html += '</table>';
+
+    if (c.processRows.length) {
+      html += '<table class="fee"><thead><tr><th>产品部位</th><th>工艺</th><th>计费方式</th><th>面数/数量</th><th>单价</th><th>上机费/版费</th><th>固定费用</th><th>金额</th></tr></thead><tbody>';
+      c.processRows.forEach(r => {
+        html += '<tr><td>' + r.part + '</td><td>' + r.name + '</td><td>' + r.method + '</td><td>' + r.count
+          + '</td><td>' + money(r.unitPrice) + '</td><td>' + r.feeName + '</td><td>' + money(r.feeAmount) + '</td><td>' + money(r.total) + '</td></tr>';
+      });
+      html += '</tbody></table>';
+    }
+    if (c.accessoryRows.length) {
+      html += '<table class="fee"><thead><tr><th>配件</th><th>物品/材质</th><th>数量</th><th>单价</th><th>金额</th></tr></thead><tbody>';
+      c.accessoryRows.forEach(r => {
+        html += '<tr><td>' + r.name + '</td><td>' + (esc(r.detail) || "—") + '</td><td>' + r.qty + '</td><td>' + money(r.unitPrice) + '</td><td>' + money(r.amount) + '</td></tr>';
+      });
+      html += '</tbody></table>';
+    }
+    html += '<div class="prod-sum"><span>产品金额：' + money(c.productAmount) + '</span>'
+      + '<span>工艺金额：' + money(c.processAmount) + '</span>'
+      + '<span>配件金额：' + money(c.accessoryAmount) + '</span>'
+      + '<span class="strong">小计：' + money(c.total) + '</span></div></div>';
+  });
+
+  const grand = all.reduce((s, c) => s + c.total, 0);
+  html += '<div class="grand">总费用合计：<b>' + money(grand) + '</b></div></div>';
+  document.getElementById("preview").innerHTML = html;
+}
+
+/* ---------- 面板渲染 ---------- */
+function priceQtyRow(pi, base) {
+  const o = getByPath(state, "products." + pi + "." + base);
+  return '<div class="field-row">'
+    + '<div class="field"><span class="lbl">下单数量</span><input type="number" data-bind="products.' + pi + '.' + base + '.orderQty" value="' + o.orderQty + '"></div>'
+    + '<div class="field"><span class="lbl">单价</span><input type="number" data-bind="products.' + pi + '.' + base + '.unitPrice" value="' + o.unitPrice + '"></div></div>';
+}
+function renderProcessSelect(pi, part, keys) {
+  return keys.map(k => {
+    const p = state.processCatalog[k];
+    const ps = getByPath(state, "products." + pi + "." + part + ".processes." + k);
+    const label = p.method === "每面" ? "面数" : "数量";
+    let row = '<div class="proc-row"><label><input type="checkbox" data-bind="products.' + pi + '.' + part + '.processes.' + k + '.selected"'
+      + (ps.selected ? " checked" : "") + '> ' + p.name + ' <span class="muted">(' + p.method + ')</span></label>';
+    if (ps.selected) {
+      row += '<label class="sides">' + label + '<input type="number" min="0" data-bind="products.' + pi + '.' + part + '.processes.' + k + '.sides" value="' + ps.sides + '"></label>';
+    }
+    row += '</div>';
+    return row;
+  }).join("");
+}
+function renderHandbagBody(pi) {
+  const hb = state.products[pi].handbag;
+  return priceQtyRow(pi, "handbag")
+    + '<div class="field-row">'
+    + '<div class="field"><span class="lbl">型号</span><input type="text" data-bind="products.' + pi + '.handbag.model" value="' + esc(hb.model) + '"></div>'
+    + '<div class="field"><span class="lbl">颜色</span><input type="text" data-bind="products.' + pi + '.handbag.color" value="' + esc(hb.color) + '"></div></div>'
+    + '<div class="proc-title">工艺（彩印 / 丝印 / 烫金）</div>' + renderProcessSelect(pi, "handbag", PART_PROCESSES.handbag);
+}
+function renderGiftboxBody(pi) {
+  const gb = state.products[pi].giftbox;
+  return priceQtyRow(pi, "giftbox")
+    + '<div class="field-row">'
+    + '<div class="field"><span class="lbl">型号</span><input type="text" data-bind="products.' + pi + '.giftbox.model" value="' + esc(gb.model) + '"></div>'
+    + '<div class="field"><span class="lbl">颜色</span><input type="text" data-bind="products.' + pi + '.giftbox.color" value="' + esc(gb.color) + '"></div></div>'
+    + '<div class="proc-title">工艺（彩印 / 丝印 / 烫金 / 冷烫）</div>' + renderProcessSelect(pi, "giftbox", PART_PROCESSES.giftbox);
+}
+function renderLiningBody(pi) {
+  const L = state.products[pi].lining;
+  let h = priceQtyRow(pi, "lining");
+  h += '<div class="field-row"><div class="field"><span class="lbl">内衬类型</span><div style="display:flex;gap:14px;padding-top:4px;">'
+    + '<label><input type="radio" name="lintype' + pi + '" data-liningtype="' + pi + '.default"' + (L.type === "default" ? " checked" : "") + '> 默认内衬</label>'
+    + '<label><input type="radio" name="lintype' + pi + '" data-liningtype="' + pi + '.custom"' + (L.type === "custom" ? " checked" : "") + '> 定制内衬</label></div></div></div>';
+  if (L.type === "default") {
+    const d = L.defaultLining;
+    h += '<div class="sub">'
+      + '<div class="field-row"><div class="field"><span class="lbl">数量</span><input type="number" data-bind="products.' + pi + '.lining.defaultLining.quantity" value="' + d.quantity + '"></div>'
+      + '<div class="field"><span class="lbl">内衬种类</span><input type="text" data-bind="products.' + pi + '.lining.defaultLining.type" value="' + esc(d.type) + '" placeholder="茶饼/泡袋/马口罐..."></div>'
+      + '<div class="field"><span class="lbl">内衬颜色</span><input type="text" data-bind="products.' + pi + '.lining.defaultLining.color" value="' + esc(d.color) + '"></div></div></div>';
+  } else {
+    const cu = L.customLining;
+    h += '<div class="sub">'
+      + '<div class="field-row"><div class="field"><span class="lbl">数量</span><input type="number" data-bind="products.' + pi + '.lining.customLining.quantity" value="' + cu.quantity + '"></div>'
+      + '<div class="field"><span class="lbl">材质</span><input type="text" data-bind="products.' + pi + '.lining.customLining.material" value="' + esc(cu.material) + '" placeholder="珍珠棉/灰板/卡纸/EVA"></div>'
+      + '<div class="field"><span class="lbl">颜色</span><input type="text" data-bind="products.' + pi + '.lining.customLining.color" value="' + esc(cu.color) + '"></div></div></div>';
+  }
+  return h;
+}
+function compBlock(pi, key, title, bodyHtml) {
+  const en = state.products[pi][key].enabled;
+  if (en) {
+    return '<div class="comp"><div class="comp-head"><span class="comp-title">' + title + '</span>'
+      + '<button class="del-comp" data-delcomp="' + pi + '.' + key + '">删除</button></div>'
+      + '<div class="comp-body">' + bodyHtml + '</div></div>';
+  }
+  return '<button class="add-comp-btn" data-addcomp="' + pi + '.' + key + '">+ 添加' + title + '</button>';
+}
+function renderAccessory(pi, key, label, inner) {
+  const acc = state.products[pi].accessories[key];
+  return '<div class="acc"><label class="acc-head"><input type="checkbox" data-toggleacc="' + pi + '.' + key + '"'
+    + (acc.enabled ? " checked" : "") + '> ' + label + '</label>'
+    + (acc.enabled ? '<div class="acc-body">' + inner + '</div>' : '') + '</div>';
+}
+function renderProductCard(pi) {
+  const p = state.products[pi];
+  const opt = (val, arr) => arr.map(o => '<option' + (val === o ? " selected" : "") + '>' + o + '</option>').join("");
+
+  let h = '<div class="prod-card"><div class="prod-card-head">'
+    + '<input class="prod-name" type="text" data-quickfill="' + pi + '" value="' + esc(p.quickFill) + '"'
+    + ' placeholder="型号-颜色-几个-东西-下单数量" title="按 型号-颜色-几个-东西-下单数量 顺序输入，用“-”隔开，自动填入手提袋/礼盒/内衬">'
+    + (state.products.length > 1 ? '<button class="del-comp" data-delproduct="' + pi + '">删除商品</button>' : '') + '</div>';
+  h += '<div class="field-row"><div class="field" style="flex:1 1 100%;">'
+    + '<span class="lbl">商品名称（打印标题，如 产品1）</span>'
+    + '<input type="text" data-bind="products.' + pi + '.name" value="' + esc(p.name) + '"></div></div>';
+
+  h += compBlock(pi, "handbag", "手提袋", renderHandbagBody(pi));
+  h += compBlock(pi, "giftbox", "礼盒", renderGiftboxBody(pi));
+  h += compBlock(pi, "lining", "内衬", renderLiningBody(pi));
+
+  h += '<div class="sub-title">配件（可选）</div>';
+  h += renderAccessory(pi, "blister", "泡袋",
+    '<div class="field-row"><div class="field"><span class="lbl">材质编号</span><input type="text" data-bind="products.' + pi + '.accessories.blister.color" value="' + esc(p.accessories.blister.color) + '"></div>'
+    + '<div class="field"><span class="lbl">数量</span><input type="number" data-bind="products.' + pi + '.accessories.blister.quantity" value="' + p.accessories.blister.quantity + '"></div>'
+    + '<div class="field"><span class="lbl">单价</span><input type="number" data-bind="products.' + pi + '.accessories.blister.unitPrice" value="' + p.accessories.blister.unitPrice + '"></div></div>');
+  h += renderAccessory(pi, "titlePage", "扉页",
+    '<div class="field-row"><div class="field"><span class="lbl">材质</span><select data-bind="products.' + pi + '.accessories.titlePage.material">' + opt(p.accessories.titlePage.material, ["稻香纸", "硫酸纸", "其它"]) + '</select></div>'
+    + '<div class="field"><span class="lbl">数量</span><input type="number" data-bind="products.' + pi + '.accessories.titlePage.quantity" value="' + p.accessories.titlePage.quantity + '"></div>'
+    + '<div class="field"><span class="lbl">单价</span><input type="number" data-bind="products.' + pi + '.accessories.titlePage.unitPrice" value="' + p.accessories.titlePage.unitPrice + '"></div></div>');
+  h += renderAccessory(pi, "sticker", "不干胶",
+    '<div class="field-row"><div class="field"><span class="lbl">材质</span><select data-bind="products.' + pi + '.accessories.sticker.material">' + opt(p.accessories.sticker.material, ["书写纸", "艾利纸", "牛皮纸", "红色洒金", "白色洒金", "白色珠光纸", "黄色珠光纸", "其它"]) + '</select></div>'
+    + '<div class="field"><span class="lbl">数量</span><input type="number" data-bind="products.' + pi + '.accessories.sticker.quantity" value="' + p.accessories.sticker.quantity + '"></div>'
+    + '<div class="field"><span class="lbl">单价</span><input type="number" data-bind="products.' + pi + '.accessories.sticker.unitPrice" value="' + p.accessories.sticker.unitPrice + '"></div></div>');
+  h += renderAccessory(pi, "combo", "其它",
+    '<div class="field-row"><div class="field"><span class="lbl">物品名称</span><input type="text" data-bind="products.' + pi + '.accessories.combo.item" value="' + esc(p.accessories.combo.item) + '"></div>'
+    + '<div class="field"><span class="lbl">颜色</span><input type="text" data-bind="products.' + pi + '.accessories.combo.color" value="' + esc(p.accessories.combo.color) + '"></div>'
+    + '<div class="field"><span class="lbl">数量</span><input type="number" data-bind="products.' + pi + '.accessories.combo.quantity" value="' + p.accessories.combo.quantity + '"></div>'
+    + '<div class="field"><span class="lbl">单价</span><input type="number" data-bind="products.' + pi + '.accessories.combo.unitPrice" value="' + p.accessories.combo.unitPrice + '"></div></div>');
+
+  return h + '</div>';
+}
+function renderProcessCatalog() {
+  const keys = ["caixi", "siyin", "lengtang", "tangjin", "dingnei"];
+  let h = '<table class="cat"><thead><tr><th>工艺名称</th><th>计费方式</th><th>单价</th><th>固定费用名</th><th>固定费用金额</th></tr></thead><tbody>';
+  keys.forEach(k => {
+    const p = state.processCatalog[k];
+    h += '<tr><td>' + p.name + '</td><td>' + p.method + '</td>'
+      + '<td><input type="number" data-bind="processCatalog.' + k + '.unitPrice" value="' + p.unitPrice + '"></td>'
+      + '<td><input type="text" data-bind="processCatalog.' + k + '.feeName" value="' + esc(p.feeName) + '"></td>'
+      + '<td><input type="number" data-bind="processCatalog.' + k + '.feeAmount" value="' + p.feeAmount + '"></td></tr>';
+  });
+  return h + '</tbody></table>';
+}
+function renderQuoteInfo() {
+  const q = state.quote;
+  return '<div class="field-row">'
+    + '<div class="field"><span class="lbl">客户名称</span><input type="text" data-bind="quote.customer" value="' + esc(q.customer) + '"></div>'
+    + '<div class="field"><span class="lbl">单号</span><input type="text" data-bind="quote.no" value="' + esc(q.no) + '"></div>'
+    + '<div class="field"><span class="lbl">日期</span><input type="date" data-bind="quote.date" value="' + esc(q.date) + '"></div></div>';
+}
+function renderPanel() {
+  const panel = document.getElementById("panel");
+  let html = '<div class="panel-section"><h3>报价单信息</h3>' + renderQuoteInfo() + '</div>';
+  html += '<div class="panel-section"><h3>工艺费用设置（调整实时生效）</h3>' + renderProcessCatalog() + '</div>';
+  html += '<div class="panel-section"><h3>商品列表（手提袋 / 礼盒 / 内衬 均可删除后添加回来）</h3>';
+  state.products.forEach((p, pi) => { html += renderProductCard(pi); });
+  html += '<button id="addProduct2" class="add-btn" data-addproduct2="">+ 添加商品</button></div>';
+  panel.innerHTML = html;
+}
+function renderAll() { renderPanel(); renderPreview(); }
+function addProduct() {
+  state.products.push(createProduct("产品" + (state.products.length + 1)));
+  renderAll();
+}
+
+/* ---------- 面板事件 ---------- */
+function onPanelInput(e) {
+  const el = e.target;
+  if (el.dataset.bind !== undefined && el.type !== "checkbox") {
+    let v = el.value;
+    if (el.type === "number") v = parseFloat(v) || 0;
+    setByPath(state, el.dataset.bind, v);
+    renderPreview();
+  }
+}
+function onPanelChange(e) {
+  const el = e.target;
+  if (el.dataset.bind !== undefined && el.type === "checkbox") {
+    setByPath(state, el.dataset.bind, el.checked);
+    renderAll(); return;
+  }
+  if (el.dataset.bind !== undefined && el.tagName === "SELECT") { // 仅 select 元素
+    setByPath(state, el.dataset.bind, el.value);
+    renderPreview(); return;
+  }
+  if (el.dataset.liningtype !== undefined) {
+    const parts = el.dataset.liningtype.split(".");
+    setByPath(state, "products." + parts[0] + ".lining.type", parts[1]);
+    renderAll(); return;
+  }
+  if (el.dataset.toggleacc !== undefined) {
+    const parts = el.dataset.toggleacc.split(".");
+    const cur = getByPath(state, "products." + parts[0] + ".accessories." + parts[1] + ".enabled");
+    setByPath(state, "products." + parts[0] + ".accessories." + parts[1] + ".enabled", !cur);
+    renderAll(); return;
+  }
+  if (el.dataset.quickfill !== undefined) {
+    const pi = +el.dataset.quickfill;
+    state.products[pi].quickFill = el.value;
+    applyQuickFill(pi, el.value);
+    renderAll(); return;
+  }
+}
+function onPanelClick(e) {
+  const t = e.target.closest("button");
+  if (!t) return;
+  if (t.dataset.delproduct !== undefined) {
+    state.products.splice(+t.dataset.delproduct, 1); renderAll(); return;
+  }
+  if (t.dataset.addproduct2 !== undefined) { addProduct(); return; }
+  if (t.dataset.delcomp !== undefined) {
+    const a = t.dataset.delcomp.split(".");
+    setByPath(state, "products." + a[0] + "." + a[1] + ".enabled", false); renderAll(); return;
+  }
+  if (t.dataset.addcomp !== undefined) {
+    const a = t.dataset.addcomp.split(".");
+    setByPath(state, "products." + a[0] + "." + a[1] + ".enabled", true); renderAll(); return;
+  }
+}
+
+/* ---------- 导出 Excel ---------- */
+function exportExcel() {
+  let rows = '<tr><th colspan="7">报价单</th></tr>';
+  rows += '<tr><td>客户</td><td>' + esc(state.quote.customer) + '</td><td>单号</td><td>' + esc(state.quote.no)
+    + '</td><td>日期</td><td colspan="2">' + esc(state.quote.date) + '</td></tr>';
+  const all = calcAllProducts();
+  all.forEach((c, pi) => {
+    const p = state.products[pi];
+    rows += '<tr><th colspan="7">' + (esc(p.name) || ("产品" + (pi + 1))) + '</th></tr>';
+    if (p.handbag.enabled) {
+      rows += '<tr><td>手提袋</td><td colspan="6">型号：' + esc(p.handbag.model) + ' 颜色：' + esc(p.handbag.color)
+        + ' 单价：' + p.handbag.unitPrice + ' 数量：' + p.handbag.orderQty + ' 金额：' + (p.handbag.unitPrice * p.handbag.orderQty) + '</td></tr>';
+    }
+    if (p.giftbox.enabled) {
+      rows += '<tr><td>礼盒</td><td colspan="6">型号：' + esc(p.giftbox.model) + ' 颜色：' + esc(p.giftbox.color)
+        + ' 单价：' + p.giftbox.unitPrice + ' 数量：' + p.giftbox.orderQty + ' 金额：' + (p.giftbox.unitPrice * p.giftbox.orderQty) + '</td></tr>';
+    }
+    if (p.lining.enabled) {
+      if (p.lining.type === "default") {
+        const d = p.lining.defaultLining;
+        rows += '<tr><td>内衬</td><td colspan="6">默认内衬 内衬数量：' + d.quantity + ' 种类：' + esc(d.type) + ' 颜色：' + esc(d.color)
+          + ' 单价：' + p.lining.unitPrice + ' 数量：' + p.lining.orderQty + ' 金额：' + (p.lining.unitPrice * p.lining.orderQty) + '</td></tr>';
+      } else {
+        const cu = p.lining.customLining;
+        rows += '<tr><td>内衬</td><td colspan="6">定制内衬 内衬数量：' + cu.quantity + ' 材质：' + esc(cu.material) + ' 颜色：' + esc(cu.color)
+          + ' 单价：' + p.lining.unitPrice + ' 数量：' + p.lining.orderQty + ' 金额：' + (p.lining.unitPrice * p.lining.orderQty) + '</td></tr>';
+      }
+    }
+    if (c.processRows.length) {
+      rows += '<tr><th>产品部位</th><th>工艺</th><th>计费方式</th><th>面数/数量</th><th>单价</th><th>上机费/版费</th><th>固定费用</th><th>金额</th></tr>';
+      c.processRows.forEach(r => {
+        rows += '<tr><td>' + r.part + '</td><td>' + r.name + '</td><td>' + r.method + '</td><td>' + r.count
+          + '</td><td>' + r.unitPrice + '</td><td>' + r.feeName + '</td><td>' + r.feeAmount + '</td><td>' + r.total + '</td></tr>';
+      });
+    }
+    if (c.accessoryRows.length) {
+      rows += '<tr><th>配件</th><th>物品/材质</th><th>数量</th><th>单价</th><th colspan="4">金额</th></tr>';
+      c.accessoryRows.forEach(r => {
+        rows += '<tr><td>' + r.name + '</td><td>' + (esc(r.detail) || "") + '</td><td>' + r.qty + '</td><td>' + r.unitPrice + '</td><td colspan="4">' + r.amount + '</td></tr>';
+      });
+    }
+    rows += '<tr><td>小计</td><td colspan="6">' + c.total + '</td></tr>';
+  });
+  const grand = all.reduce((s, c) => s + c.total, 0);
+  rows += '<tr><th colspan="6">总费用合计</th><td>' + grand + '</td></tr>';
+
+  const html = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel">'
+    + '<head><meta charset="UTF-8"></head><body><table border="1">' + rows + '</table></body></html>';
+  const blob = new Blob(["﻿" + html], { type: "application/vnd.ms-excel;charset=utf-8" });
+  download(blob, "报价单_" + (state.quote.no || "export") + ".xls");
+}
+
+/* ---------- 初始化 ---------- */
+function init() {
+  const panel = document.getElementById("panel");
+  panel.addEventListener("input", onPanelInput);
+  panel.addEventListener("change", onPanelChange);
+  panel.addEventListener("click", onPanelClick);
+  document.getElementById("addProduct").addEventListener("click", addProduct);
+  document.getElementById("exportExcel").addEventListener("click", exportExcel);
+  document.getElementById("exportPdf").addEventListener("click", () => window.print());
+  renderPanel();
+  renderPreview();
+}
+init();
+</script>
+</body>
+</html>
