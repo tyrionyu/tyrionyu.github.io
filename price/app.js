@@ -39,7 +39,7 @@ function createProduct(name) {
 }
 
 const state = {
-  quote: { customer: "", no: "", date: todayStr(), status: "草稿", version: 1 },
+  quote: { customer: "", no: "", date: todayStr(), status: "草稿", version: 1, shipping: 0, taxRate: 0, remark: "", contact: "", phone: "" },
   processCatalog: {
     caixi:    { name: "彩印", method: "每面", unitPrice: 1, feeName: "上机费", feeAmount: 10 },
     siyin:    { name: "丝印", method: "每面", unitPrice: 1, feeName: "版费",   feeAmount: 10 },
@@ -67,6 +67,47 @@ function esc(s) {
 }
 function money(n) {
   return "¥" + (Math.round((n || 0) * 100) / 100).toLocaleString("zh-CN", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+function toChineseUpper(num) {
+  num = Math.abs(Number(num) || 0);
+  const digit = ['零','壹','贰','叁','肆','伍','陆','柒','捌','玖'];
+  const unit = ['', '拾', '佰', '仟'];
+  const secUnit = ['', '万', '亿', '兆'];
+  const intPart = Math.floor(num + 1e-9);
+  const cents = Math.round((num - intPart) * 100);
+  if (intPart === 0 && cents === 0) return '零元整';
+  let intStr = '';
+  if (intPart > 0) {
+    let n = intPart, secs = [];
+    while (n > 0) { secs.unshift(n % 10000); n = Math.floor(n / 10000); }
+    for (let i = 0; i < secs.length; i++) {
+      const v = secs[i];
+      const su = secUnit[secs.length - 1 - i];
+      if (v === 0) {
+        if (intStr !== '' && !intStr.endsWith('零')) intStr += '零';
+        continue;
+      }
+      let secStr = '', zeroFlag = false, str = String(v);
+      for (let j = 0; j < str.length; j++) {
+        const d = parseInt(str[j], 10), p = str.length - 1 - j;
+        if (d === 0) { zeroFlag = true; }
+        else { if (zeroFlag && secStr !== '') secStr += '零'; secStr += digit[d] + unit[p]; zeroFlag = false; }
+      }
+      intStr += secStr + su;
+    }
+    if (intStr.endsWith('零')) intStr = intStr.slice(0, -1);
+    intStr += '元';
+  }
+  let out = intStr;
+  if (cents === 0) {
+    out += '整';
+  } else {
+    const jiao = Math.floor(cents / 10), fen = cents % 10;
+    if (jiao > 0) out += digit[jiao] + '角';
+    else if (intPart > 0) out += '零';
+    if (fen > 0) out += digit[fen] + '分';
+  }
+  return out;
 }
 function download(blob, filename) {
   const url = URL.createObjectURL(blob);
@@ -172,6 +213,8 @@ function renderPreview() {
   const q = state.quote;
   let html = '<div class="doc"><div class="doc-head"><h1>报 价 单</h1><div class="doc-meta">'
     + '<div><span>客户：</span>' + (esc(q.customer) || "—") + '</div>'
+    + '<div><span>联系人：</span>' + (esc(q.contact) || "—") + '</div>'
+    + '<div><span>电话：</span>' + (esc(q.phone) || "—") + '</div>'
     + '<div><span>单号：</span>' + (esc(q.no) || "—") + '</div>'
     + '<div><span>日期：</span>' + (esc(q.date) || "—") + '</div></div></div>';
 
@@ -228,7 +271,16 @@ function renderPreview() {
   });
 
   const grand = all.reduce((s, c) => s + c.total, 0);
-  html += '<div class="grand">总费用合计：<b>' + money(grand) + '</b></div></div>';
+  const shipping = Number(q.shipping) || 0;
+  const taxRate = Number(q.taxRate) || 0;
+  const tax = (grand + shipping) * taxRate / 100;
+  const total = grand + shipping + tax;
+  html += '<div class="sum-line">费用合计（不含税/运费）：<b>' + money(grand) + '</b></div>';
+  html += '<div class="sum-line">运费：<b>' + money(shipping) + '</b></div>';
+  html += '<div class="sum-line">税费（' + (taxRate || 0) + '%）：<b>' + money(tax) + '</b></div>';
+  html += '<div class="grand">应付总计：<b>' + money(total) + '</b></div>';
+  html += '<div class="sum-cap">价税合计（大写）：' + toChineseUpper(total) + '</div>';
+  html += '<div class="remark"><span>备注与说明：</span>' + (esc(q.remark) || "—") + '</div></div>';
   document.getElementById("preview").innerHTML = html;
 }
 
@@ -240,7 +292,7 @@ function priceQtyRow(pi, base) {
     + '<div class="field"><span class="lbl">单价</span><input type="number" data-bind="products.' + pi + '.' + base + '.unitPrice" value="' + o.unitPrice + '"></div></div>';
 }
 function renderProcessSelect(pi, part, keys) {
-  return keys.map(k => {
+  const rows = keys.map(k => {
     const p = state.processCatalog[k];
     const ps = getByPath(state, "products." + pi + "." + part + ".processes." + k);
     const label = p.method === "每面" ? "面数" : "数量";
@@ -252,6 +304,7 @@ function renderProcessSelect(pi, part, keys) {
     row += '</div>';
     return row;
   }).join("");
+  return '<div class="proc-rows">' + rows + '</div>';
 }
 function renderHandbagBody(pi) {
   const hb = state.products[pi].handbag;
@@ -272,9 +325,11 @@ function renderGiftboxBody(pi) {
 function renderLiningBody(pi) {
   const L = state.products[pi].lining;
   let h = priceQtyRow(pi, "lining");
-  h += '<div class="field-row"><div class="field"><span class="lbl">内衬类型</span><div style="display:flex;gap:14px;padding-top:4px;">'
-    + '<label><input type="radio" name="lintype' + pi + '" data-liningtype="' + pi + '.default"' + (L.type === "default" ? " checked" : "") + '> 默认内衬</label>'
-    + '<label><input type="radio" name="lintype' + pi + '" data-liningtype="' + pi + '.custom"' + (L.type === "custom" ? " checked" : "") + '> 定制内衬</label></div></div></div>';
+  h += '<div class="field-row"><div class="field" style="flex:1 1 100%;"><span class="lbl">内衬类型</span>'
+    + '<div class="lining-cards">'
+    + '<label class="lining-card' + (L.type === "default" ? " is-on" : "") + '"><input type="radio" name="lintype' + pi + '" data-liningtype="' + pi + '.default"' + (L.type === "default" ? " checked" : "") + '><span class="lc-title">默认内衬</span><span class="lc-desc">标准内衬方案</span></label>'
+    + '<label class="lining-card' + (L.type === "custom" ? " is-on" : "") + '"><input type="radio" name="lintype' + pi + '" data-liningtype="' + pi + '.custom"' + (L.type === "custom" ? " checked" : "") + '><span class="lc-title">定制内衬</span><span class="lc-desc">自定义材质规格</span></label>'
+    + '</div></div></div>';
   if (L.type === "default") {
     const d = L.defaultLining;
     h += '<div class="sub">'
@@ -364,9 +419,16 @@ function renderQuoteInfo() {
   return '<div class="field-row">'
     + '<div class="field"><span class="lbl">客户名称</span><input type="text" data-bind="quote.customer" value="' + esc(q.customer) + '"></div>'
     + '<div class="field"><span class="lbl">单号</span><input type="text" data-bind="quote.no" value="' + esc(q.no) + '"></div>'
-    + '<div class="field"><span class="lbl">日期</span><input type="date" data-bind="quote.date" value="' + esc(q.date) + '"></div>'
-    + '<div class="field"><span class="lbl">状态</span><select data-bind="quote.status">' + opt(q.status, ["草稿", "定稿"]) + '</select></div>'
-    + '<div class="field"><span class="lbl">版本号</span><input type="text" value="v' + (Number(q.version) || 1) + '" readonly title="每次导出自动 +1"></div></div>';
+    + '<div class="field"><span class="lbl">日期</span><input type="date" data-bind="quote.date" value="' + esc(q.date) + '"></div></div>'
+    + '<div class="field-row">'
+    + '<div class="field"><span class="lbl">联系人</span><input type="text" data-bind="quote.contact" value="' + esc(q.contact) + '"></div>'
+    + '<div class="field"><span class="lbl">电话</span><input type="text" data-bind="quote.phone" value="' + esc(q.phone) + '"></div></div>'
+    + '<div class="field-row"><div class="field"><span class="lbl">状态</span><select data-bind="quote.status">' + opt(q.status, ["草稿", "定稿"]) + '</select></div>'
+    + '<div class="field"><span class="lbl">版本号</span><input type="text" value="v' + (Number(q.version) || 1) + '" readonly title="每次导出自动 +1"></div></div>'
+    + '<div class="field-row">'
+    + '<div class="field"><span class="lbl">运费 (¥)</span><input type="number" min="0" step="0.01" data-bind="quote.shipping" value="' + (Number(q.shipping) || 0) + '"></div>'
+    + '<div class="field"><span class="lbl">税率 (%)</span><input type="number" min="0" step="0.01" data-bind="quote.taxRate" value="' + (Number(q.taxRate) || 0) + '"></div></div>'
+    + '<div class="field" style="flex:1 1 100%"><span class="lbl">备注与说明</span><textarea data-bind="quote.remark" rows="2" placeholder="交期 / 付款方式 / 特殊要求">' + esc(q.remark) + '</textarea></div>';
 }
 function renderPanel() {
   const panel = document.getElementById("panel");
@@ -380,6 +442,11 @@ function renderPanel() {
 function renderAll() { renderPanel(); renderPreview(); }
 function addProduct() {
   state.products.push(createProduct("产品" + (state.products.length + 1)));
+  renderAll();
+}
+function resetProducts() {
+  if (!confirm("确定要清空所有商品吗？")) return;
+  state.products = [ createProduct("产品1") ];
   renderAll();
 }
 
@@ -458,6 +525,7 @@ function exportExcel() {
   const mainData = [];
   mainData.push(["报价单"]);
   mainData.push(["客户", state.quote.customer || "", "单号", state.quote.no || "", "日期", state.quote.date || "", "", ""]);
+  mainData.push(["联系人", state.quote.contact || "", "电话", state.quote.phone || "", "", "", "", ""]);
 
   const all = calcAllProducts();
   all.forEach((c, pi) => {
@@ -565,8 +633,17 @@ function exportExcel() {
     mainData.push(["", "", "", "", "", "", "", ""]); // 小计下方空白行（间隔/手填，不参与计算）
   });
   var grand = all.reduce(function(s, c) { return s + c.total; }, 0);
-  // “总费用合计”标签由 A 列移到 G 列（与 H 列金额对齐），A 列留空
-  mainData.push(["", "", "", "", "", "", "总费用合计", grand]);
+  var q = state.quote;
+  var shipping = Number(q.shipping) || 0;
+  var taxRate = Number(q.taxRate) || 0;
+  var tax = (grand + shipping) * taxRate / 100;
+  var total = grand + shipping + tax;
+  mainData.push(["", "", "", "", "", "", "费用合计（不含税/运费）", grand]);
+  mainData.push(["", "", "", "", "", "", "运费", shipping]);
+  mainData.push(["", "", "", "", "", "", "税费（" + (taxRate || 0) + "%）", tax]);
+  mainData.push(["", "", "", "", "", "", "应付总计", total]);
+  mainData.push(["", "", "", "", "", "", "价税合计（大写）", toChineseUpper(total)]);
+  mainData.push(["备注与说明", (q.remark || ""), "", "", "", "", "", ""]);
 
   // ====== Sheet 2：工艺费用设置 ======
   var keys = ["caixi", "siyin", "lengtang", "tangjin", "dingnei"];
@@ -602,7 +679,7 @@ function init() {
   panel.addEventListener("input", onPanelInput);
   panel.addEventListener("change", onPanelChange);
   panel.addEventListener("click", onPanelClick);
-  document.getElementById("addProduct").addEventListener("click", addProduct);
+  document.getElementById("resetBtn").addEventListener("click", resetProducts);
   document.getElementById("exportExcel").addEventListener("click", exportExcel);
   document.getElementById("exportPdf").addEventListener("click", () => {
     const fileName = buildExportFileName();
