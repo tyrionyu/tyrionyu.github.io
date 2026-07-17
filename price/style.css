@@ -51,6 +51,21 @@
   }
   .toolbar { display: flex; gap: 8px; flex-wrap: wrap; }
 
+  /* ---------- 汉堡菜单按钮（仅移动端可见） ---------- */
+  .menu-toggle {
+    display: none;
+    flex-direction: column; justify-content: center; align-items: center; gap: 4px;
+    width: 40px; height: 40px; padding: 0;
+    border: 1px solid var(--line-2); border-radius: var(--radius-sm); background: #fff;
+  }
+  .menu-toggle span {
+    display: block; width: 18px; height: 2px; border-radius: 2px;
+    background: var(--ink-2); transition: transform .2s var(--ease), opacity .2s var(--ease);
+  }
+  .menu-toggle[aria-expanded="true"] span:nth-child(1) { transform: translateY(6px) rotate(45deg); }
+  .menu-toggle[aria-expanded="true"] span:nth-child(2) { opacity: 0; }
+  .menu-toggle[aria-expanded="true"] span:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
+
   /* ---------- 按钮：扁平填充 / 描边，无渐变、无阴影 ---------- */
   button {
     font-family: inherit; font-size: 13px; cursor: pointer;
@@ -205,11 +220,78 @@
   .lining-card.is-on .lc-title { color: var(--brand-d); }
   .lining-card:focus-within { box-shadow: 0 0 0 3px var(--brand-ring); }
 
-  /* ---------- 响应式 / 打印 / 动效偏好（保持原有）---------- */
+  /* ---------- 响应式 ---------- */
+  /* 平板 / 中屏：上下堆叠，取消固定高度 */
   @media (max-width: 900px) {
     main { flex-direction: column; height: auto; }
-    .panel { max-width: none; border-left: none; border-top: 1px solid var(--line); }
+    .preview { flex: none; }
+    .panel { flex: none; max-width: none; border-left: none; border-top: 1px solid var(--line); }
   }
+
+  /* 手机：≤640px，全面触控优化 */
+  @media (max-width: 640px) {
+    body { font-size: 14px; line-height: 1.7; }
+
+    /* 顶栏：折叠工具栏为汉堡菜单 */
+    header { flex-wrap: wrap; padding: 10px 14px; gap: 8px; }
+    header h1 { font-size: 15px; flex: 1; }
+    .menu-toggle { display: flex; }
+    .toolbar {
+      flex-basis: 100%; flex-direction: column; align-items: stretch; gap: 8px;
+      overflow: hidden; max-height: 0; opacity: 0;
+      transition: max-height .25s var(--ease), opacity .2s var(--ease), margin .25s var(--ease);
+    }
+    .toolbar.open { max-height: 260px; opacity: 1; margin-top: 4px; }
+    .toolbar button { width: 100%; min-height: 44px; font-size: 15px; }
+
+    /* 主体内边距收紧，避免拥挤 */
+    .preview { padding: 12px; }
+    .panel { padding: 12px 12px 28px; }
+
+    /* 预览文档：缩小内边距，防止溢出 */
+    .doc { padding: 18px 14px; border-radius: 6px; }
+    .doc-head h1 { font-size: 20px; letter-spacing: 2px; }
+    .doc-meta { flex-direction: column; gap: 4px; font-size: 13px; }
+    .prod-block h2 { font-size: 15px; }
+
+    /* 表格：横向可滚动容器，避免撑破屏幕 */
+    table { font-size: 12px; }
+    table.fee, table.cfg { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; white-space: nowrap; }
+    table.cfg th { width: auto; }
+
+    .grand { font-size: 17px; }
+    .grand b { font-size: 22px; }
+
+    /* 面板：字段单列排布，触控友好 */
+    .panel-section { padding: 12px; }
+    .field-row { gap: 8px; }
+    .field { flex: 1 1 100%; }
+    .field input, .field select { min-height: 40px; font-size: 15px; padding: 6px 4px; }
+    .field textarea { font-size: 15px; }
+
+    /* 工艺行 / 内衬卡片：单列，避免横向拥挤 */
+    .proc-row { flex: 1 1 100%; }
+    .proc-row .sides input { min-height: 36px; }
+    .lining-cards { flex-direction: column; gap: 8px; }
+
+    /* 按钮触控区域 ≥44px */
+    button { min-height: 42px; padding: 9px 14px; }
+    .del-comp { min-height: 34px; padding: 5px 12px; }
+    .add-btn, .add-comp-btn { min-height: 46px; }
+    .prod-name { min-height: 42px; font-size: 15px; }
+
+    /* 工艺费用设置表：横向滚动 */
+    table.cat { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; white-space: nowrap; }
+    table.cat input { width: 72px; min-height: 34px; }
+  }
+
+  /* 超小屏：≤380px，进一步精简 */
+  @media (max-width: 380px) {
+    .doc { padding: 14px 10px; }
+    .doc-head h1 { font-size: 18px; }
+    .grand b { font-size: 20px; }
+  }
+
   @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
   @media print {
     header, .panel { display: none !important; }

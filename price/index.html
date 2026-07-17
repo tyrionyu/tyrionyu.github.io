@@ -10,7 +10,10 @@
 <body>
 <header>
   <h1>报价单生成器</h1>
-  <div class="toolbar">
+  <button id="menuToggle" class="menu-toggle" aria-label="展开菜单" aria-expanded="false" aria-controls="toolbar">
+    <span></span><span></span><span></span>
+  </button>
+  <div class="toolbar" id="toolbar">
     <button id="resetBtn" class="primary">重置</button>
     <button id="exportExcel">导出 Excel</button>
     <button id="exportPdf">导出 PDF</button>

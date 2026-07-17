@@ -41,11 +41,11 @@ function createProduct(name) {
 const state = {
   quote: { customer: "", no: "", date: todayStr(), status: "草稿", version: 1, shipping: 0, taxRate: 0, remark: "", contact: "", phone: "" },
   processCatalog: {
-    caixi:    { name: "彩印", method: "每面", unitPrice: 1, feeName: "上机费", feeAmount: 10 },
-    siyin:    { name: "丝印", method: "每面", unitPrice: 1, feeName: "版费",   feeAmount: 10 },
-    lengtang: { name: "冷烫", method: "每面", unitPrice: 1, feeName: "版费",   feeAmount: 10 },
-    tangjin:  { name: "烫金", method: "每面", unitPrice: 1, feeName: "版费",   feeAmount: 10 },
-    dingnei:  { name: "定制内衬", method: "每个", unitPrice: 1, feeName: "版费", feeAmount: 10 }
+    caixi:    { name: "彩印", method: "每面", unitPrice: 2, feeName: "上机费", feeAmount: 60 },
+    siyin:    { name: "丝印", method: "每面", unitPrice: 0.5, feeName: "版费",   feeAmount: 100 },
+    lengtang: { name: "冷烫", method: "每面", unitPrice: 2, feeName: "版费",   feeAmount: 100 },
+    tangjin:  { name: "烫金", method: "每面", unitPrice: 2, feeName: "版费",   feeAmount: 300 },
+    dingnei:  { name: "定制内衬", method: "每个", unitPrice: 1, feeName: "版费", feeAmount: 100 }
   },
   products: [ createProduct("产品1") ]
 };
@@ -679,6 +679,25 @@ function init() {
   panel.addEventListener("input", onPanelInput);
   panel.addEventListener("change", onPanelChange);
   panel.addEventListener("click", onPanelClick);
+  // 移动端汉堡菜单：展开/收起工具栏
+  const menuToggle = document.getElementById("menuToggle");
+  const toolbar = document.getElementById("toolbar");
+  if (menuToggle && toolbar) {
+    menuToggle.addEventListener("click", () => {
+      const open = toolbar.classList.toggle("open");
+      menuToggle.setAttribute("aria-expanded", open ? "true" : "false");
+      menuToggle.setAttribute("aria-label", open ? "收起菜单" : "展开菜单");
+    });
+    // 点击工具栏内任一按钮后自动收起菜单
+    toolbar.addEventListener("click", (e) => {
+      if (e.target.closest("button")) {
+        toolbar.classList.remove("open");
+        menuToggle.setAttribute("aria-expanded", "false");
+        menuToggle.setAttribute("aria-label", "展开菜单");
+      }
+    });
+  }
+
   document.getElementById("resetBtn").addEventListener("click", resetProducts);
   document.getElementById("exportExcel").addEventListener("click", exportExcel);
   document.getElementById("exportPdf").addEventListener("click", () => {
