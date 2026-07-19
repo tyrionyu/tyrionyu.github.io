@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>俞征佳 · 在线包装盒 3D 样机</title>
   <link rel="icon" href='data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%20width%3D%2264%22%20height%3D%2264%22%20role%3D%22img%22%20aria-label%3D%22Box%20net%208%20favicon%22%3E%3Cg%20fill%3D%22none%22%20stroke%3D%22%232563EB%22%20stroke-width%3D%224.20%22%20stroke-linejoin%3D%22round%22%3E%3Crect%20x%3D%2218.00%22%20y%3D%2211.00%22%20width%3D%2214.00%22%20height%3D%2214.00%22%20rx%3D%221.2%22%2F%3E%3Crect%20x%3D%2232.00%22%20y%3D%2225.00%22%20width%3D%2214.00%22%20height%3D%2214.00%22%20rx%3D%221.2%22%2F%3E%3Crect%20x%3D%2218.00%22%20y%3D%2239.00%22%20width%3D%2214.00%22%20height%3D%2214.00%22%20rx%3D%221.2%22%2F%3E%3Crect%20x%3D%2218.00%22%20y%3D%2225.00%22%20width%3D%2214.00%22%20height%3D%2214.00%22%20rx%3D%221.2%22%2F%3E%3Crect%20x%3D%224.00%22%20y%3D%2225.00%22%20width%3D%2214.00%22%20height%3D%2214.00%22%20rx%3D%221.2%22%2F%3E%3Crect%20x%3D%2246.00%22%20y%3D%2225.00%22%20width%3D%2214.00%22%20height%3D%2214.00%22%20rx%3D%221.2%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E'>
   <link rel="stylesheet" href="styles.css" />
@@ -17,7 +17,11 @@
     </main>
 
     <!-- 右侧：操作面板 -->
-    <aside class="panel">
+    <aside class="panel" id="panel">
+      <div class="panel-head">
+        <span class="panel-grip" aria-hidden="true"></span>
+        <button type="button" class="panel-close" id="panelClose" aria-label="收起面板">收起</button>
+      </div>
       <header class="brand">
         <div class="logo">俞<span>征佳</span></div>
         <div class="brand-sub">在线包装盒 3D 样机预览</div>
@@ -99,6 +103,12 @@
       </section>
     </aside>
   </div>
+
+  <!-- 移动端：浮动汉堡菜单按钮 + 抽屉遮罩（桌面端隐藏） -->
+  <button type="button" class="menu-toggle" id="menuToggle" aria-label="打开控制面板" aria-expanded="false" aria-controls="panel">
+    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg>
+  </button>
+  <div class="panel-backdrop" id="panelBackdrop"></div>
 
   <!-- 本地 Three.js（无需 NPM / 框架，可直接打开 index.html 运行） -->
   <script src="lib/three.min.js"></script>

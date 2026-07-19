@@ -292,6 +292,31 @@
   $('resetBtn').addEventListener('click', resetView);
   $('downloadBtn').addEventListener('click', download);
 
+  // ---------- 移动端：控制面板抽屉 ----------
+  const appEl = document.querySelector('.app');
+  const menuToggle = $('menuToggle');
+  const panelBackdrop = $('panelBackdrop');
+  const panelClose = $('panelClose');
+  if (menuToggle) {
+    const openPanel = () => {
+      appEl.classList.add('panel-open');
+      menuToggle.setAttribute('aria-expanded', 'true');
+    };
+    const closePanel = () => {
+      appEl.classList.remove('panel-open');
+      menuToggle.setAttribute('aria-expanded', 'false');
+    };
+    menuToggle.addEventListener('click', () =>
+      appEl.classList.contains('panel-open') ? closePanel() : openPanel()
+    );
+    panelBackdrop.addEventListener('click', closePanel);
+    panelClose.addEventListener('click', closePanel);
+    // 切回桌面宽度时自动收起抽屉，避免状态残留
+    window.addEventListener('resize', () => {
+      if (window.innerWidth > 820) closePanel();
+    });
+  }
+
   // ---------- 自适应尺寸 ----------
   function onResize() {
     const w = stage.clientWidth;

@@ -16,6 +16,7 @@
 html, body {
   margin: 0;
   height: 100%;
+  overflow-x: hidden;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue",
     "PingFang SC", "Microsoft YaHei", sans-serif;
   color: var(--text);
@@ -315,15 +316,153 @@ html, body {
 .solid-btn:hover { background: #000; }
 .solid-btn.full { width: 100%; }
 
-/* ============ 移动端：上下排列 ============ */
+/* ============ 媒体元素按比例缩放 ============ */
+img, video, canvas { max-width: 100%; }
+
+/* ============ 移动端专属元素（桌面隐藏） ============ */
+.menu-toggle { display: none; }
+.panel-backdrop { display: none; }
+.panel-head { display: none; }
+
+/* ============ 移动端：画布全屏 + 面板抽屉 ============ */
 @media (max-width: 820px) {
-  .app { flex-direction: column; }
-  .stage { flex: none; height: 48vh; min-height: 320px; }
-  .panel {
+  html, body { height: 100%; }
+
+  .app {
+    display: block;
+    position: relative;
+    height: 100vh;
+    height: 100dvh;
+    overflow: hidden;
+  }
+
+  /* 3D 预览作为移动端主视图，占满整屏 */
+  .stage {
     width: 100%;
-    flex: 1 1 auto;
+    height: 100%;
+    min-height: 0;
+  }
+  .stage-hint {
+    font-size: 11px;
+    left: 12px;
+    bottom: calc(12px + env(safe-area-inset-bottom));
+    padding: 6px 9px;
+  }
+
+  /* 浮动汉堡菜单按钮 */
+  .menu-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    position: fixed;
+    top: calc(14px + env(safe-area-inset-top));
+    right: 14px;
+    z-index: 30;
+    width: 46px;
+    height: 46px;
+    border-radius: 12px;
+    border: 1px solid var(--line);
+    background: rgba(255, 255, 255, .88);
+    box-shadow: var(--shadow-panel);
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
+    color: var(--text);
+    cursor: pointer;
+  }
+  .menu-toggle svg { width: 22px; height: 22px; }
+
+  /* 底部抽屉式控制面板 */
+  .panel {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 40;
+    width: 100%;
+    max-height: 86vh;
+    max-height: 86dvh;
     border-left: none;
     border-top: 1px solid var(--line);
+    border-radius: 18px 18px 0 0;
+    padding: 6px 16px calc(18px + env(safe-area-inset-bottom));
+    transform: translateY(100%);
+    transition: transform .28s cubic-bezier(.22, .61, .36, 1);
+    box-shadow: 0 -10px 34px rgba(20, 20, 20, .14);
+    -webkit-overflow-scrolling: touch;
   }
-  .stage-hint { font-size: 11px; }
+  .app.panel-open .panel { transform: translateY(0); }
+  .app.panel-open .panel-backdrop { display: block; }
+
+  .panel-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 35;
+    background: rgba(20, 20, 20, .30);
+  }
+
+  /* 抽屉顶部抓手 + 收起入口 */
+  .panel-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 2px 4px;
+    margin-bottom: 8px;
+  }
+  .panel-grip {
+    flex: 1;
+    height: 5px;
+    max-width: 46px;
+    margin: 0 auto;
+    border-radius: 999px;
+    background: var(--line-strong);
+  }
+  .panel-close {
+    appearance: none;
+    border: none;
+    background: none;
+    color: var(--muted);
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    padding: 6px 8px;
+    min-height: 36px;
+  }
+
+  /* 字体放大、行距与触控区优化 */
+  .brand { margin-bottom: 16px; padding-bottom: 14px; }
+  .logo { font-size: 24px; }
+  .brand-sub { font-size: 13px; margin-top: 6px; }
+  .block { margin-bottom: 18px; }
+  .block h3 { font-size: 14px; margin-bottom: 10px; }
+  .muted { font-size: 12px; }
+
+  .dim { padding: 10px; }
+  .dim span { font-size: 14px; }
+  .dim input { font-size: 15px; }
+
+  .face-btn {
+    font-size: 14px;
+    padding: 12px 0;
+    min-height: 44px;
+  }
+  .face-grid { gap: 8px; }
+
+  .upload-zone { padding: 16px 12px; }
+  .uz-inner { font-size: 13px; }
+  .link-btn { font-size: 13px; min-height: 36px; }
+  .ghost-btn {
+    font-size: 13.5px;
+    padding: 12px 0;
+    min-height: 44px;
+  }
+  .hint { font-size: 12px; line-height: 1.6; }
+
+  .color-field { padding: 10px 12px; font-size: 13.5px; min-height: 44px; }
+  .swatch { width: 32px; height: 32px; }
+
+  .toggle-btn, .solid-btn {
+    font-size: 14px;
+    padding: 13px 0;
+    min-height: 44px;
+  }
 }
