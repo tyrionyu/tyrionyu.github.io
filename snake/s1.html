@@ -1,0 +1,1187 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>贪吃蛇 Snake</title>
+<style>
+  :root {
+    --bg: #0f1226;
+    --panel: #1a1f3d;
+    --accent: #4ade80;
+    --accent2: #22d3ee;
+    --food: #f87171;
+    --text: #e5e7eb;
+    --muted: #9ca3af;
+    --uiw: 420px;
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body {
+    margin: 0; height: 100%;
+    background: radial-gradient(1200px 800px at 70% -10%, #1e2749, var(--bg));
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+  }
+  .wrap {
+    min-height: 100%;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 16px; gap: 14px;
+  }
+  h1 {
+    margin: 0; font-size: 22px; letter-spacing: 2px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .scoreboard { display: flex; gap: 10px; width: 100%; max-width: var(--uiw, 420px); }
+  .score-card {
+    flex: 1; background: var(--panel); border-radius: 14px;
+    padding: 9px 10px; text-align: center;
+    border: 1px solid rgba(255,255,255,0.06);
+  }
+  .score-card .label { font-size: 11px; color: var(--muted); }
+  .score-card .value { font-size: 22px; font-weight: 700; margin-top: 2px; }
+  .toggles {
+    display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: center;
+    width: 100%; max-width: var(--uiw, 420px);
+  }
+  .toggles .tbtn {
+    border: 1px solid rgba(255,255,255,0.18); background: transparent;
+    color: var(--muted); padding: 7px 14px; border-radius: 999px; cursor: pointer;
+    font-size: 13px; transition: all .12s ease; user-select: none;
+  }
+  .toggles .tbtn.on {
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    color: #04201a; border-color: transparent; font-weight: 600;
+  }
+  .themerow {
+    display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: center;
+    width: 100%; max-width: var(--uiw, 420px); font-size: 13px; color: var(--muted);
+  }
+  .themerow .tlabel { width: 100%; text-align: center; margin-bottom: 2px; }
+  .themerow button {
+    border: 1px solid rgba(255,255,255,0.18); background: transparent;
+    color: var(--text); padding: 6px 12px; border-radius: 999px; cursor: pointer; font-size: 13px;
+    transition: all .12s ease;
+  }
+  .themerow button.active {
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    color: #04201a; border-color: transparent; font-weight: 600;
+  }
+  .maprow {
+    display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: center;
+    width: 100%; max-width: var(--uiw, 420px); font-size: 13px; color: var(--muted);
+  }
+  .maprow .mlabel { width: 100%; text-align: center; margin-bottom: 2px; }
+  .maprow button {
+    border: 1px solid rgba(255,255,255,0.18); background: transparent;
+    color: var(--text); padding: 7px 14px; border-radius: 999px; cursor: pointer; font-size: 13px;
+    transition: all .12s ease;
+  }
+  .maprow button.active {
+    background: linear-gradient(90deg, var(--accent2), #818cf8);
+    color: #04201a; border-color: transparent; font-weight: 600;
+  }
+  .editorow {
+    display: none; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: center;
+    width: 100%; max-width: var(--uiw, 420px);
+  }
+  .editorow button {
+    border: 1px solid rgba(255,255,255,0.18); background: transparent;
+    color: var(--text); padding: 7px 14px; border-radius: 999px; cursor: pointer; font-size: 13px;
+  }
+  .editorow button.on {
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    color: #04201a; border-color: transparent; font-weight: 600;
+  }
+  .editorow .etip { width: 100%; text-align: center; color: var(--muted); font-size: 12px; min-height: 16px; }
+  .diff {
+    display: flex; gap: 8px; align-items: center; justify-content: center;
+    width: 100%; max-width: var(--uiw, 420px);
+    font-size: 13px; color: var(--muted);
+  }
+  .diff button {
+    border: 1px solid rgba(255,255,255,0.18); background: transparent;
+    color: var(--text); padding: 6px 14px; border-radius: 999px; cursor: pointer; font-size: 13px;
+  }
+  .diff button.active { background: var(--accent); color: #04201a; border-color: transparent; font-weight: 600; }
+  .sizerow {
+    display: flex; align-items: center; gap: 10px;
+    width: 100%; max-width: var(--uiw, 420px);
+    font-size: 13px; color: var(--muted);
+  }
+  .sizerow span:first-child { white-space: nowrap; }
+  .sizerow input[type=range] { flex: 1; accent-color: var(--accent); cursor: pointer; }
+  .sizerow .sizeval { min-width: 38px; text-align: right; color: var(--text); font-weight: 600; }
+  .stage { position: relative; width: 100%; max-width: var(--uiw, 420px); }
+  canvas {
+    width: 100%; display: block; border-radius: 16px;
+    background: linear-gradient(180deg, #131830, #0d1024);
+    border: 1px solid rgba(255,255,255,0.08);
+    box-shadow: 0 20px 50px rgba(0,0,0,0.45); touch-action: none;
+  }
+  .toast {
+    position: absolute; top: 14px; left: 50%;
+    transform: translateX(-50%) translateY(-12px);
+    background: rgba(8,10,24,0.9); border: 1px solid rgba(255,255,255,0.14);
+    color: var(--text); padding: 9px 16px; border-radius: 999px; font-size: 14px; font-weight: 600;
+    opacity: 0; pointer-events: none; transition: opacity .25s ease, transform .25s ease; z-index: 5;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  .timer {
+    position: absolute; top: 10px; right: 12px;
+    background: rgba(8,10,24,0.72); border: 1px solid rgba(255,255,255,0.14);
+    color: var(--text); padding: 5px 12px; border-radius: 999px; font-size: 15px; font-weight: 700;
+    z-index: 4;
+  }
+  .timer.hidden { display: none; }
+  .overlay {
+    position: absolute; inset: 0; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 12px;
+    background: rgba(8,10,24,0.82); border-radius: 16px; backdrop-filter: blur(4px);
+    text-align: center; padding: 20px;
+  }
+  .overlay.hidden { display: none; }
+  .overlay h2 { margin: 0; font-size: 26px; }
+  .overlay p { margin: 0; color: var(--muted); font-size: 14px; line-height: 1.6; }
+  .btn {
+    border: none; cursor: pointer; font-size: 16px; font-weight: 600;
+    padding: 12px 26px; border-radius: 999px; color: #04201a;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    box-shadow: 0 8px 20px rgba(74,222,128,0.35); transition: transform .08s ease;
+  }
+  .btn:active { transform: scale(0.96); }
+  .btn.secondary { color: var(--text); background: transparent; border: 1px solid rgba(255,255,255,0.2); box-shadow: none; }
+  .controls { display: flex; gap: 10px; width: 100%; max-width: var(--uiw, 420px); }
+  .controls .btn { flex: 1; padding: 10px; font-size: 14px; }
+  .hint { color: var(--muted); font-size: 12px; text-align: center; max-width: var(--uiw, 420px); }
+  .lb { width: 100%; max-width: 340px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 8px 14px; text-align: left; }
+  .lb .lb-row { display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: 13px; padding: 3px 0; color: var(--text); }
+  .lb .lb-row span:first-child { color: var(--muted); }
+  .lb .lb-row .desc { color: var(--muted); font-size: 11px; max-width: 56%; text-align: right; }
+  .lb .lb-empty { color: var(--muted); font-size: 13px; text-align: center; padding: 6px 0; }
+  .lb-title { font-size: 13px; color: var(--muted); margin-bottom: 4px; text-align: center; }
+  .namerow { display: flex; align-items: center; justify-content: center; gap: 6px; width: 100%; max-width: var(--uiw, 420px); font-size: 13px; color: var(--muted); }
+  .namerow .name-tag { color: var(--accent); font-weight: 700; cursor: pointer; padding: 3px 12px; border: 1px solid rgba(255,255,255,0.22); border-radius: 999px; user-select: none; }
+  .namerow .name-tag:active { transform: scale(0.96); }
+  .namerow .namerow-hint { font-size: 11px; opacity: 0.7; }
+  .lb-actions { display: none; gap: 10px; width: 100%; max-width: 340px; }
+  .lb-actions .btn { flex: 1; padding: 9px; font-size: 13px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>🐍 贪吃蛇 SNAKE</h1>
+
+  <div class="scoreboard">
+    <div class="score-card"><div class="label">得分</div><div class="value" id="score">0</div></div>
+    <div class="score-card"><div class="label">等级</div><div class="value" id="level">1</div></div>
+    <div class="score-card"><div class="label">最高分</div><div class="value" id="best">0</div></div>
+  </div>
+
+  <div class="namerow">昵称：<span id="nameTag" class="name-tag">玩家</span><span class="namerow-hint">（点击修改，用于共享榜）</span></div>
+
+  <div class="toggles">
+    <div class="tbtn" id="tgWrap">穿墙模式</div>
+    <div class="tbtn on" id="tgSound">音效</div>
+    <div class="tbtn" id="tgTimed">限时挑战</div>
+    <div class="tbtn" id="tgAI">AI ×0</div>
+  </div>
+
+  <div class="themerow" id="themerow">
+    <div class="tlabel">皮肤</div>
+    <button data-theme="classic" class="active">经典</button>
+    <button data-theme="neon">霓虹</button>
+    <button data-theme="retro">复古</button>
+    <button data-theme="ocean">海洋</button>
+    <button data-theme="sunset">黄昏</button>
+  </div>
+
+  <div class="maprow">
+    <div class="mlabel">地图</div>
+    <button data-map="classic" class="active">经典</button>
+    <button data-map="random">随机障碍</button>
+    <button data-map="cross">十字迷阵</button>
+    <button data-map="rings">回字迷宫</button>
+    <button data-map="grid">棋阵</button>
+    <button data-map="custom">自定义</button>
+  </div>
+
+  <div class="editorow" id="editorow">
+    <button id="editBtn">✏️ 编辑地图</button>
+    <button id="clearBtn">清空障碍</button>
+    <button id="exportBtn">📤 导出码</button>
+    <button id="importBtn">📥 导入码</button>
+    <span class="etip" id="editTip"></span>
+  </div>
+
+  <div class="diff">
+    难度：
+    <button data-speed="140" class="active">悠闲</button>
+    <button data-speed="100">普通</button>
+    <button data-speed="70">挑战</button>
+    <button data-speed="45">疯狂</button>
+  </div>
+
+  <div class="sizerow">
+    <span>格子</span>
+    <input type="range" id="sizeRange" min="15" max="35" step="2" value="21" />
+    <span class="sizeval" id="sizeVal">21×21</span>
+  </div>
+
+  <div class="stage">
+    <canvas id="game" width="420" height="420"></canvas>
+    <div class="toast" id="toast"></div>
+    <div class="timer hidden" id="timer">⏱ 60</div>
+    <div class="overlay" id="overlay">
+      <h2 id="ovTitle">准备开始</h2>
+      <p id="ovText">用 方向键 / WASD 控制方向<br/>手机可直接滑动屏幕<br/>吃到食物得分，撞墙或撞自己即结束</p>
+      <div id="ovLb"></div>
+      <div class="lb-actions" id="lbActions" style="display:none">
+        <button class="btn secondary" id="exportLbBtn">📤 导出榜</button>
+        <button class="btn secondary" id="importLbBtn">📥 导入榜</button>
+      </div>
+      <button class="btn" id="startBtn">开始游戏</button>
+    </div>
+  </div>
+
+  <div class="controls">
+    <button class="btn" id="pauseBtn">暂停</button>
+    <button class="btn secondary" id="restartBtn">重新开始</button>
+    <button class="btn secondary" id="lbBtn">排行榜</button>
+    <button class="btn secondary" id="achBtn">成就</button>
+  </div>
+
+  <div class="hint">点「AI ×N」可加入电脑对手（蓝/粉/黄，其中蓝/黄为凶型，会主动拦截你的蛇头）。<b>用身体撞死 AI 可击杀 +25 分</b>（头对头双杀不计）。拖动「格子」改变棋盘格数（15~35）：<b>格子越多，可玩区域越大、同时出现的道具也越多</b>。道具：⭐金+30（限时）· 💎成长+15且蛇身+1 · 🐢减速 · 每 100 分升一级</div>
+</div>
+
+<script>
+(function () {
+  const canvas = document.getElementById('game');
+  const ctx = canvas.getContext('2d');
+  const scoreEl = document.getElementById('score');
+  const levelEl = document.getElementById('level');
+  const bestEl = document.getElementById('best');
+  const overlay = document.getElementById('overlay');
+  const ovTitle = document.getElementById('ovTitle');
+  const ovText = document.getElementById('ovText');
+  const ovLb = document.getElementById('ovLb');
+  const startBtn = document.getElementById('startBtn');
+  const pauseBtn = document.getElementById('pauseBtn');
+  const restartBtn = document.getElementById('restartBtn');
+  const lbBtn = document.getElementById('lbBtn');
+  const achBtn = document.getElementById('achBtn');
+  const tgWrap = document.getElementById('tgWrap');
+  const tgSound = document.getElementById('tgSound');
+  const tgTimed = document.getElementById('tgTimed');
+  const timerEl = document.getElementById('timer');
+  const editorow = document.getElementById('editorow');
+  const editBtn = document.getElementById('editBtn');
+  const clearBtn = document.getElementById('clearBtn');
+  const exportBtn = document.getElementById('exportBtn');
+  const importBtn = document.getElementById('importBtn');
+  const editTip = document.getElementById('editTip');
+  const toastEl = document.getElementById('toast');
+  const nameTag = document.getElementById('nameTag');
+  const lbActions = document.getElementById('lbActions');
+  const exportLbBtn = document.getElementById('exportLbBtn');
+  const importLbBtn = document.getElementById('importLbBtn');
+  const sizeRange = document.getElementById('sizeRange');
+  const sizeVal = document.getElementById('sizeVal');
+
+  let GRID = 21;
+  let CELL = 20;
+  const BEST_KEY = 'snake_best_score';
+  const LB_KEY = 'snake_leaderboard';
+  const NAME_KEY = 'snake_player_name';
+  const SET_KEY = 'snake_settings';
+  let playerName = localStorage.getItem(NAME_KEY) || '玩家';
+  const ACH_KEY = 'snake_achievements';
+  const TIME_LIMIT = 60;
+  const MAP_NAMES = { classic:'经典', random:'随机障碍', cross:'十字迷阵', rings:'回字迷宫', grid:'棋阵', custom:'自定义' };
+  const BUILTIN_MAPS = ['classic','random','cross','rings','grid'];
+  // 皮肤主题：snake=蛇身, head=蛇头, food=食物, obstacle=障碍, accent/accent2=界面强调色
+  const THEMES = {
+    classic: { snake:'#4ade80', head:'#86efac', food:'#f87171', obstacle:'#5b6478', accent:'#4ade80', accent2:'#22d3ee' },
+    neon:    { snake:'#a855f7', head:'#e879f9', food:'#fde047', obstacle:'#334155', accent:'#a855f7', accent2:'#22d3ee' },
+    retro:   { snake:'#f59e0b', head:'#fbbf24', food:'#ef4444', obstacle:'#7c2d12', accent:'#f59e0b', accent2:'#f43f5e' },
+    ocean:   { snake:'#22d3ee', head:'#67e8f9', food:'#fb7185', obstacle:'#0e7490', accent:'#22d3ee', accent2:'#38bdf8' },
+    sunset:  { snake:'#fb7185', head:'#fda4af', food:'#facc15', obstacle:'#9d4edd', accent:'#fb7185', accent2:'#c084fc' },
+  };
+  const ACHS = [
+    { id:'score30',  name:'初露锋芒', desc:'单局得分达到 30' },
+    { id:'score100', name:'百步穿杨', desc:'单局得分达到 100' },
+    { id:'food30',   name:'贪吃本性', desc:'单局吃掉 30 个食物' },
+    { id:'len20',    name:'长蛇绕梁', desc:'蛇身长度达到 20' },
+    { id:'wrap100',  name:'穿墙大师', desc:'穿墙模式单局得分达到 100' },
+    { id:'timed80',  name:'限时达人', desc:'限时模式单局得分达到 80' },
+    { id:'custom',   name:'地图工匠', desc:'用自定义地图完成一局' },
+    { id:'collector',name:'地图收藏家', desc:'玩过全部 5 张内置地图' },
+    { id:'kill1',    name:'猎手初现', desc:'单局击杀 1 条 AI 蛇' },
+    { id:'kill3',    name:'清场之王', desc:'单局击杀全部 3 条 AI 蛇' },
+  ];
+
+  // —— 设置（持久化）——
+  let settings = { wrap: false, sound: true, map: 'classic', customMap: [], mapsPlayed: [], theme: 'classic', timed: false, size: 21, ai: 0 };
+  try {
+    const saved = JSON.parse(localStorage.getItem(SET_KEY) || '{}');
+    settings = Object.assign(settings, saved);
+    if (!Array.isArray(settings.customMap)) settings.customMap = [];
+    if (!Array.isArray(settings.mapsPlayed)) settings.mapsPlayed = [];
+    if (!THEMES[settings.theme]) settings.theme = 'classic';
+  } catch (e) {}
+  function saveSettings() { localStorage.setItem(SET_KEY, JSON.stringify(settings)); }
+  function getAch() { try { return JSON.parse(localStorage.getItem(ACH_KEY) || '{}'); } catch (e) { return {}; } }
+  function saveAch(a) { localStorage.setItem(ACH_KEY, JSON.stringify(a)); }
+  function applyTheme() {
+    const t = THEMES[settings.theme] || THEMES.classic;
+    document.documentElement.style.setProperty('--accent', t.accent);
+    document.documentElement.style.setProperty('--accent2', t.accent2);
+  }
+  function syncToggleUI() {
+    tgWrap.classList.toggle('on', settings.wrap);
+    tgSound.classList.toggle('on', settings.sound);
+    tgTimed.classList.toggle('on', settings.timed);
+    tgAI.textContent = 'AI ×' + (settings.ai | 0);
+    tgAI.classList.toggle('on', (settings.ai | 0) > 0);
+    document.querySelectorAll('.maprow button').forEach(b => b.classList.toggle('active', b.dataset.map === settings.map));
+    document.querySelectorAll('.themerow button').forEach(b => b.classList.toggle('active', b.dataset.theme === settings.theme));
+  }
+  syncToggleUI();
+  applyTheme();
+
+  // —— 通用提示 ——
+  function toast(msg) {
+    toastEl.textContent = msg; toastEl.classList.add('show');
+    clearTimeout(toast._t); toast._t = setTimeout(() => toastEl.classList.remove('show'), 1600);
+  }
+
+  // —— 设置交互 ——
+  tgWrap.addEventListener('click', () => { settings.wrap = !settings.wrap; syncToggleUI(); saveSettings(); });
+  tgSound.addEventListener('click', () => { settings.sound = !settings.sound; syncToggleUI(); saveSettings(); });
+  tgTimed.addEventListener('click', () => {
+    settings.timed = !settings.timed; syncToggleUI(); saveSettings();
+    if (running && !gameOver) toast('限时模式将在下一局生效');
+  });
+  tgAI.addEventListener('click', () => {
+    settings.ai = ((settings.ai | 0) + 1) % 4;
+    syncToggleUI(); saveSettings();
+    if (running && !gameOver) toast('AI 数量将在下一局生效');
+    else { reset(); draw(); }
+  });
+  document.querySelectorAll('.maprow button').forEach(b => {
+    b.addEventListener('click', () => {
+      settings.map = b.dataset.map; syncToggleUI(); saveSettings();
+      if (editing) exitEdit();
+      updateEditorRow();
+      if (running) toast('切换地图后点「重新开始」生效');
+      else { reset(); draw(); }
+    });
+  });
+  document.querySelectorAll('.themerow button').forEach(b => {
+    b.addEventListener('click', () => {
+      settings.theme = b.dataset.theme; syncToggleUI(); saveSettings(); applyTheme(); draw();
+    });
+  });
+
+  // —— 音效（Web Audio，无外部文件）——
+  let audioCtx = null;
+  function ensureAudio() {
+    if (!audioCtx) { try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { audioCtx = null; } }
+    if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+  }
+  function beep(freq, dur, type, vol) {
+    if (!settings.sound) return;
+    ensureAudio(); if (!audioCtx) return;
+    const o = audioCtx.createOscillator(); const g = audioCtx.createGain();
+    o.type = type || 'square'; o.frequency.value = freq; g.gain.value = vol || 0.08;
+    o.connect(g); g.connect(audioCtx.destination);
+    const t = audioCtx.currentTime;
+    g.gain.setValueAtTime(g.gain.value, t);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    o.start(t); o.stop(t + dur);
+  }
+  function sndEat() { beep(660, 0.09, 'square'); }
+  function sndSpecial() { beep(880, 0.10, 'triangle'); setTimeout(() => beep(1175, 0.10, 'triangle'), 90); }
+  function sndTurn() { beep(320, 0.04, 'sine', 0.04); }
+  function sndLevel() { beep(523, 0.10, 'triangle'); setTimeout(() => beep(784, 0.14, 'triangle'), 100); }
+  function sndOver() {
+    if (!settings.sound) return;
+    beep(440, 0.12, 'sawtooth', 0.09);
+    setTimeout(() => beep(330, 0.12, 'sawtooth', 0.09), 110);
+    setTimeout(() => beep(220, 0.22, 'sawtooth', 0.09), 230);
+  }
+
+  // —— 排行榜 ——
+  function getLeaderboard() {
+    let raw = [];
+    try { raw = JSON.parse(localStorage.getItem(LB_KEY) || '[]'); } catch (e) { raw = []; }
+    // 兼容旧格式 {score,date} → 补全字段
+    return raw.map(r => ({
+      name: r.name || '玩家',
+      score: r.score || 0,
+      map: r.map || '',
+      timed: !!r.timed,
+      date: r.date || ''
+    }));
+  }
+  function addToLeaderboard(s) {
+    const lb = getLeaderboard();
+    lb.push({
+      name: playerName,
+      score: s,
+      map: MAP_NAMES[settings.map] || '',
+      timed: settings.timed,
+      date: new Date().toISOString().slice(0, 10)
+    });
+    lb.sort((a, b) => b.score - a.score || (a.date < b.date ? 1 : -1));
+    const top = lb.slice(0, 10);
+    localStorage.setItem(LB_KEY, JSON.stringify(top));
+    return top;
+  }
+  function renderLeaderboard(container, highlightScore) {
+    const lb = getLeaderboard();
+    if (!lb.length) { container.innerHTML = '<div class="lb-title">🏆 排行榜</div><div class="lb-empty">暂无记录，快来挑战！</div>'; return; }
+    const accent = (THEMES[settings.theme] || THEMES.classic).accent;
+    let rows = lb.map((r, i) => {
+      const isMe = r.name === playerName;
+      const hot = (highlightScore != null && r.score === highlightScore) || isMe;
+      const style = hot ? ' style="color:' + accent + ';font-weight:700"' : '';
+      const badge = isMe ? ' 🟢' : '';
+      const tag = (r.map ? ' · ' + r.map : '') + (r.timed ? ' ⏱' : '') + (r.date ? ' · ' + r.date : '');
+      return '<div class="lb-row"' + style + '><span>第' + (i + 1) + '名 ' + r.name + badge + '</span><span class="desc">' + r.score + ' 分' + tag + '</span></div>';
+    }).join('');
+    container.innerHTML = '<div class="lb-title">🏆 共享排行榜 Top 10（本机）</div>' + rows;
+  }
+  function setName() {
+    const n = prompt('设置你的昵称（用于共享排行榜）：', playerName);
+    if (n && n.trim()) {
+      playerName = n.trim().slice(0, 12);
+      localStorage.setItem(NAME_KEY, playerName);
+      nameTag.textContent = playerName;
+    }
+  }
+  function exportLb() {
+    const code = btoa(unescape(encodeURIComponent(JSON.stringify(getLeaderboard()))));
+    prompt('复制下面的排行榜分享码，发给朋友（对方在「排行榜」里点「导入榜」即可合并）：', code);
+  }
+  function importLb() {
+    const code = prompt('粘贴排行榜分享码：');
+    if (!code) return;
+    try {
+      const incoming = JSON.parse(decodeURIComponent(escape(atob(code.trim()))));
+      if (!Array.isArray(incoming)) throw new Error('bad');
+      const lb = getLeaderboard();
+      const seen = new Set(lb.map(r => r.name + '|' + r.score + '|' + r.date));
+      let added = 0;
+      incoming.forEach(r => {
+        if (!r || typeof r.score !== 'number') return;
+        const item = { name: r.name || '玩家', score: r.score, map: r.map || '', timed: !!r.timed, date: r.date || '' };
+        const key = item.name + '|' + item.score + '|' + item.date;
+        if (!seen.has(key)) { seen.add(key); lb.push(item); added++; }
+      });
+      lb.sort((a, b) => b.score - a.score || (a.date < b.date ? 1 : -1));
+      const top = lb.slice(0, 10);
+      localStorage.setItem(LB_KEY, JSON.stringify(top));
+      renderLeaderboard(ovLb, null);
+      toast('✅ 已合并 ' + added + ' 条成绩');
+    } catch (e) { toast('分享码无效'); }
+  }
+  nameTag.addEventListener('click', setName);
+  exportLbBtn.addEventListener('click', exportLb);
+  importLbBtn.addEventListener('click', importLb);
+
+  // —— 成就 ——
+  function unlock(id) {
+    const a = getAch();
+    if (a[id]) return;
+    a[id] = true; saveAch(a);
+    const def = ACHS.find(x => x.id === id);
+    toast('🏆 成就解锁：' + (def ? def.name : id));
+    if (overlayMode === 'achievements') renderAchievements(ovLb);
+  }
+  function checkAchievements() {
+    if (score >= 30) unlock('score30');
+    if (score >= 100) unlock('score100');
+    if (foodEaten >= 30) unlock('food30');
+    if (snake.length >= 20) unlock('len20');
+    if (settings.wrap && score >= 100) unlock('wrap100');
+    if (settings.timed && score >= 80) unlock('timed80');
+    if (kills >= 1) unlock('kill1');
+    if (kills >= 3) unlock('kill3');
+  }
+  function renderAchievements(container) {
+    const got = getAch();
+    let html = '<div class="lb-title">🏆 成就（' + ACHS.filter(a => got[a.id]).length + '/' + ACHS.length + '）</div>';
+    ACHS.forEach(a => {
+      const has = got[a.id];
+      html += '<div class="lb-row"><span>' + (has ? '✅ ' : '🔒 ') + a.name + '</span><span class="desc">' + a.desc + '</span></div>';
+    });
+    container.innerHTML = html;
+  }
+
+  // —— 保留区 ——
+  function buildReserved(snake) {
+    const mid = Math.floor(GRID / 2); const s = new Set();
+    snake.forEach(c => s.add(c.x + ',' + c.y));
+    for (let y = mid - 2; y <= mid + 2; y++) for (let x = mid - 2; x <= mid + 2; x++) s.add(x + ',' + y);
+    return s;
+  }
+  function centerReserved() {
+    const mid = Math.floor(GRID / 2); const s = new Set();
+    for (let y = mid - 2; y <= mid + 2; y++) for (let x = mid - 2; x <= mid + 2; x++) s.add(x + ',' + y);
+    return s;
+  }
+
+  // —— 地图生成（全部相对 GRID，任意格数均可生成且连通）——
+  function makeMap(name, snake) {
+    const mid = Math.floor(GRID / 2); let obs = [];
+    if (name === 'random') {
+      const target = Math.round(GRID * 0.6);
+      let guard = 0;
+      while (obs.length < target && guard < 1500) {
+        guard++;
+        const p = { x: Math.floor(Math.random() * GRID), y: Math.floor(Math.random() * GRID) };
+        if (obs.some(o => o.x === p.x && o.y === p.y)) continue;
+        obs.push(p);
+      }
+    } else if (name === 'cross') {
+      const k = Math.max(3, Math.round(GRID * 0.15));
+      for (let y = 0; y < GRID; y++) { if (y !== mid) { obs.push({ x: mid - k, y }); obs.push({ x: mid + k, y }); } }
+      for (let x = 0; x < GRID; x++) { if (x !== mid) { obs.push({ x, y: mid - k }); obs.push({ x, y: mid + k }); } }
+    } else if (name === 'rings') {
+      const a = Math.max(3, Math.round(GRID * 0.15));
+      const b = Math.max(6, Math.round(GRID * 0.33));
+      const add = (x, y) => obs.push({ x, y });
+      for (let i = mid - b; i <= mid + b; i++) { add(i, mid - b); add(i, mid + b); add(mid - b, i); add(mid + b, i); }
+      for (let i = mid - a; i <= mid + a; i++) { add(i, mid - a); add(i, mid + a); add(mid - a, i); add(mid + a, i); }
+      obs = obs.filter(o =>
+        !((o.x === mid) && (o.y === mid - b || o.y === mid + b || o.y === mid - a || o.y === mid + a)) &&
+        !((o.y === mid) && (o.x === mid - b || o.x === mid + b || o.x === mid - a || o.x === mid + a)));
+    } else if (name === 'grid') {
+      const step = Math.max(3, Math.round(GRID / 5));
+      for (let x = step; x < GRID; x += step) for (let y = step; y < GRID; y += step) obs.push({ x, y });
+    }
+    const reserved = buildReserved(snake);
+    obs = obs.filter(o => !reserved.has(o.x + ',' + o.y));
+    return obs;
+  }
+
+  // —— 连通性校验 ——
+  function isConnected(obsSet) {
+    const mid = Math.floor(GRID / 2); const start = mid + ',' + mid;
+    if (obsSet.has(start)) return false;
+    const seen = new Set([start]); const q = [{ x: mid, y: mid }];
+    const freeCount = GRID * GRID - obsSet.size;
+    while (q.length) {
+      const c = q.pop();
+      for (const [dx, dy] of [[1,0],[-1,0],[0,1],[0,-1]]) {
+        const nx = c.x + dx, ny = c.y + dy, k = nx + ',' + ny;
+        if (nx < 0 || ny < 0 || nx >= GRID || ny >= GRID) continue;
+        if (obsSet.has(k) || seen.has(k)) continue;
+        seen.add(k); q.push({ x: nx, y: ny });
+      }
+    }
+    return seen.size === freeCount;
+  }
+
+  // —— AI 对手蛇 ——
+  const AI_DEFS = [
+    { name: '电脑蓝', color: '#60a5fa', aggro: true },
+    { name: '电脑粉', color: '#f472b6', aggro: false },
+    { name: '电脑黄', color: '#facc15', aggro: true },
+  ];
+  function occupiedBySnakes(x, y) {
+    if (snake && snake.some(s => s.x === x && s.y === y)) return true;
+    if (aiSnakes.some(s => s.alive && s.body.some(b => b.x === x && b.y === y))) return true;
+    return false;
+  }
+  // 在四角附近生成 AI 蛇，确保初始不越界/不撞障碍/不重叠；空间不足则少生成
+  function spawnAI() {
+    aiSnakes = [];
+    const n = settings.ai | 0;
+    if (n <= 0) return;
+    const q = Math.max(2, Math.round(GRID * 0.12));
+    const cand = [
+      { hx: q, hy: q, dir: { x: 1, y: 0 } },
+      { hx: GRID - 1 - q, hy: q, dir: { x: 0, y: 1 } },
+      { hx: q, hy: GRID - 1 - q, dir: { x: 1, y: 0 } },
+      { hx: GRID - 1 - q, hy: GRID - 1 - q, dir: { x: -1, y: 0 } },
+    ];
+    for (const c of cand) {
+      if (aiSnakes.length >= n) break;
+      const body = [{ x: c.hx, y: c.hy }];
+      let ok = true; let cx = c.hx, cy = c.hy;
+      for (let i = 1; i < 3; i++) {
+        cx -= c.dir.x; cy -= c.dir.y;
+        const p = { x: cx, y: cy };
+        if (cx < 0 || cy < 0 || cx >= GRID || cy >= GRID) { ok = false; break; }
+        if (obstacles.some(o => o.x === p.x && o.y === p.y)) { ok = false; break; }
+        if (occupiedBySnakes(p.x, p.y)) { ok = false; break; }
+        body.push(p);
+      }
+      if (!ok) continue;
+      if (obstacles.some(o => o.x === c.hx && o.y === c.hy)) continue;
+      if (occupiedBySnakes(c.hx, c.hy)) continue;
+      const def = AI_DEFS[aiSnakes.length % AI_DEFS.length];
+      aiSnakes.push({ body, dir: c.dir, nextDir: c.dir, color: def.color, name: def.name, alive: true });
+    }
+  }
+  // 该格是否危险（撞墙/障碍/任意蛇非尾身体段）
+  function aiUnsafe(h) {
+    if (!settings.wrap && (h.x < 0 || h.y < 0 || h.x >= GRID || h.y >= GRID)) return true;
+    if (obstacles.some(o => o.x === h.x && o.y === h.y)) return true;
+    const bodies = [{ arr: snake }];
+    aiSnakes.forEach(s => { if (s.alive) bodies.push({ arr: s.body }); });
+    for (const b of bodies) {
+      for (let i = 0; i < b.arr.length; i++) {
+        if (i === b.arr.length - 1) continue; // 尾巴本步会移走，允许进入
+        if (b.arr[i].x === h.x && b.arr[i].y === h.y) return true;
+      }
+    }
+    return false;
+  }
+  // AI 决策：默认朝食物贪心；凶型 AI 在玩家逼近时改追"玩家预判蛇头"，主动拦截
+  function aiDecide(s) {
+    const cur = s.dir;
+    const cands = [{ x: 1, y: 0 }, { x: -1, y: 0 }, { x: 0, y: 1 }, { x: 0, y: -1 }]
+      .filter(d => !(d.x === -cur.x && d.y === -cur.y));
+    let target = food;
+    if (s.aggro && snake && snake.length) {
+      const ph = { x: snake[0].x + dir.x, y: snake[0].y + dir.y }; // 玩家下一步蛇头
+      const dToPlayer = Math.abs(s.body[0].x - ph.x) + Math.abs(s.body[0].y - ph.y);
+      if (dToPlayer <= Math.max(8, GRID * 0.45)) target = ph; // 临近时封锁玩家前进路线
+    }
+    let best = null, bestScore = -1e9;
+    for (const d of cands) {
+      let h = { x: s.body[0].x + d.x, y: s.body[0].y + d.y };
+      if (settings.wrap) { h.x = (h.x + GRID) % GRID; h.y = (h.y + GRID) % GRID; }
+      if (aiUnsafe(h)) continue;
+      const dist = -Math.abs(h.x - target.x) - Math.abs(h.y - target.y);
+      const sc = dist + Math.random() * 0.6;
+      if (sc > bestScore) { bestScore = sc; best = d; }
+    }
+    return best || cur;
+  }
+
+  // —— 游戏状态 ——
+  let baseSpeed = 140;
+  let boardPx = 420;
+  let snake, dir, nextDir, food, score, best, lastTick, acc, running, paused, gameOver, obstacles, editing, aiSnakes = [], kills = 0;
+  let specials = [], nextSpecialAt = 0, slowUntil = 0, gameNow = 0;
+  let foodEaten = 0, level = 1;
+  let overlayMode = 'start';
+  let timeLeft = 0;
+
+  // 把存储的「尺寸」规整为合法格数（15~35 的奇数，保证有正中心）
+  function normGrid(v) {
+    let g = parseInt(v, 10);
+    if (!g || g < 15 || g > 35) g = 21;
+    if (g % 2 === 0) g += 1;
+    return Math.min(35, Math.max(15, g));
+  }
+
+  // 道具数量上限随格子数增加（格子越多 → 同时出现的道具越多）
+  function maxSpecials() { return Math.max(1, Math.round(GRID / 7)); }
+
+  // 根据 GRID 计算画布：格子越多棋盘越大；统一按设备像素比高清渲染
+  function applySize() {
+    const dpr = window.devicePixelRatio || 1;
+    boardPx = GRID * 20;
+    canvas.width = Math.round(boardPx * dpr);
+    canvas.height = Math.round(boardPx * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    CELL = boardPx / GRID;
+    document.documentElement.style.setProperty('--uiw', boardPx + 'px');
+    draw();
+  }
+
+  best = parseInt(localStorage.getItem(BEST_KEY) || '0', 10);
+  bestEl.textContent = best;
+
+  function reset() {
+    const mid = Math.floor(GRID / 2);
+    snake = [{ x: mid, y: mid }, { x: mid - 1, y: mid }, { x: mid - 2, y: mid }];
+    dir = { x: 1, y: 0 }; nextDir = { x: 1, y: 0 };
+    score = 0; scoreEl.textContent = score;
+    level = 1; levelEl.textContent = level;
+    foodEaten = 0; gameOver = false; paused = false; kills = 0;
+    specials = []; slowUntil = 0; nextSpecialAt = 3000;
+    if (settings.map === 'custom') {
+      const reserved = buildReserved(snake);
+      obstacles = settings.customMap
+        .filter(p => p.x >= 0 && p.x < GRID && p.y >= 0 && p.y < GRID)
+        .map(p => ({ x: p.x, y: p.y }))
+        .filter(o => !reserved.has(o.x + ',' + o.y));
+    } else {
+      obstacles = makeMap(settings.map, snake);
+    }
+    spawnAI();
+    placeFood();
+  }
+
+  function placeFood() {
+    let p, guard = 0;
+    do {
+      p = { x: Math.floor(Math.random() * GRID), y: Math.floor(Math.random() * GRID) };
+      guard++;
+    } while (
+      (snake.some(s => s.x === p.x && s.y === p.y)) ||
+      (obstacles.some(o => o.x === p.x && o.y === p.y)) ||
+      (food && food.x === p.x && food.y === p.y) ||
+      (specials.some(sp => sp.x === p.x && sp.y === p.y) && guard < 600) ||
+      (aiSnakes.some(s => s.alive && s.body.some(b => b.x === p.x && b.y === p.y)))
+    );
+    food = p;
+  }
+
+  function spawnSpecial() {
+    if (specials.length >= maxSpecials()) return;
+    const types = ['gold', 'gold', 'grow', 'slow'];
+    const type = types[Math.floor(Math.random() * types.length)];
+    let p, guard = 0;
+    do {
+      p = { x: Math.floor(Math.random() * GRID), y: Math.floor(Math.random() * GRID) };
+      guard++;
+    } while (
+      (snake && snake.some(s => s.x === p.x && s.y === p.y)) ||
+      (obstacles && obstacles.some(o => o.x === p.x && o.y === p.y)) ||
+      (food && food.x === p.x && food.y === p.y) ||
+      (specials.some(sp => sp.x === p.x && sp.y === p.y) && guard < 600) ||
+      (aiSnakes.some(s => s.alive && s.body.some(b => b.x === p.x && b.y === p.y)))
+    );
+    specials.push({ x: p.x, y: p.y, type, expire: gameNow + 6500, life: 6500 });
+  }
+
+  function addScore(n) {
+    score += n; scoreEl.textContent = score;
+    if (score > best) { best = score; bestEl.textContent = best; localStorage.setItem(BEST_KEY, best); }
+    const lv = 1 + Math.floor(score / 100);
+    if (lv > level) { level = lv; levelEl.textContent = level; sndLevel(); toast('升级！ LV ' + level); }
+    checkAchievements();
+  }
+
+  function applySpecial(type) {
+    sndSpecial();
+    if (type === 'gold') addScore(30);
+    else if (type === 'grow') addScore(15);
+    else if (type === 'slow') { addScore(10); slowUntil = gameNow + 5000; toast('🐢 减速辅助 5 秒'); }
+  }
+
+  function step() {
+    dir = nextDir;
+    const liveAI = aiSnakes.filter(s => s.alive);
+    liveAI.forEach(s => { s.nextDir = aiDecide(s); s.dir = s.nextDir; });
+
+    // 阶段1：计算新头 + 墙/障碍判定
+    let pHead = { x: snake[0].x + dir.x, y: snake[0].y + dir.y };
+    let pDead = false;
+    if (settings.wrap) { pHead.x = (pHead.x + GRID) % GRID; pHead.y = (pHead.y + GRID) % GRID; }
+    else if (pHead.x < 0 || pHead.y < 0 || pHead.x >= GRID || pHead.y >= GRID) pDead = true;
+    if (!pDead && obstacles.some(o => o.x === pHead.x && o.y === pHead.y)) pDead = true;
+
+    liveAI.forEach(s => {
+      let h = { x: s.body[0].x + s.dir.x, y: s.body[0].y + s.dir.y };
+      let dead = false;
+      if (settings.wrap) { h.x = (h.x + GRID) % GRID; h.y = (h.y + GRID) % GRID; }
+      else if (h.x < 0 || h.y < 0 || h.x >= GRID || h.y >= GRID) dead = true;
+      if (!dead && obstacles.some(o => o.x === h.x && o.y === h.y)) dead = true;
+      s.newHead = h; s.willDead = dead;
+    });
+
+    // 阶段1.5：决定谁吃到食物（玩家优先，避免多蛇争食冲突）
+    let eater = null;
+    const want = [];
+    if (!pDead && pHead.x === food.x && pHead.y === food.y) want.push('player');
+    liveAI.forEach(s => { if (!s.willDead && s.newHead.x === food.x && s.newHead.y === food.y) want.push(s); });
+    if (want.length) { const pp = want.find(w => w === 'player'); eater = pp ? 'player' : want[0]; }
+
+    // 阶段2：移动 + 吃食物
+    if (!pDead) {
+      snake.unshift(pHead);
+      if (eater === 'player') { foodEaten++; addScore(10); sndEat(); }
+      else snake.pop();
+    }
+    liveAI.forEach(s => { if (s.willDead) return; s.body.unshift(s.newHead); if (eater !== s) s.body.pop(); });
+    if (eater) placeFood();
+
+    // 玩家吃特殊道具（仅玩家可吃）
+    if (!pDead && specials.length) {
+      const hi = specials.findIndex(sp => sp.x === pHead.x && sp.y === pHead.y);
+      if (hi >= 0) { applySpecial(specials[hi].type); specials.splice(hi, 1); nextSpecialAt = gameNow + 3500 + Math.random() * 3000; }
+    }
+
+    // 阶段3：碰撞判定（基于移动后的身体；头对头自动双杀）
+    const movers = [];
+    if (!pDead) movers.push({ isPlayer: true, body: snake, head: pHead });
+    liveAI.forEach(s => { if (!s.willDead) movers.push({ isPlayer: false, ref: s, body: s.body, head: s.newHead }); });
+    movers.forEach(m => {
+      let dead = false;
+      movers.forEach(o => {
+        if (o === m) { for (let i = 1; i < m.body.length; i++) if (m.body[i].x === m.head.x && m.body[i].y === m.head.y) dead = true; }
+        else { for (let i = 0; i < o.body.length; i++) if (o.body[i].x === m.head.x && o.body[i].y === m.head.y) dead = true; }
+      });
+      m.dead = dead;
+    });
+    const pMover = movers.find(m => m.isPlayer);
+    const playerAlive = !pDead && pMover && !pMover.dead;
+    if (pDead || (pMover && pMover.dead)) { end(); return; }
+    liveAI.forEach(s => {
+      const m = movers.find(x => x.ref === s);
+      if (s.willDead || (m && m.dead)) {
+        if (s.alive) {
+          s.alive = false;
+          // 玩家击杀：AI 头撞到玩家身体且玩家仍存活（头对头双杀不计入）
+          let killedByPlayer = false;
+          if (playerAlive && m) killedByPlayer = pMover.body.some(b => b.x === m.head.x && b.y === m.head.y);
+          if (killedByPlayer) { kills++; addScore(25); toast('🗡️ 击杀 ' + s.name + ' +25'); }
+          else toast('💥 ' + s.name + ' 出局');
+        }
+      }
+    });
+    checkAchievements();
+  }
+
+  function end(reason) {
+    gameOver = true; running = false; sndOver();
+    addToLeaderboard(score);
+    lbActions.style.display = 'none';
+    if (settings.map === 'custom') unlock('custom');
+    ovTitle.textContent = '游戏结束';
+    let sub = '地图：' + (MAP_NAMES[settings.map] || '');
+    if (reason === 'time') sub += ' · <b>限时结束</b>';
+    sub += ' · 本局 <b style="color:' + (THEMES[settings.theme].accent) + '">' + score + '</b> 分 · 最高 ' + best;
+    if (kills > 0) sub += ' · 击杀 <b>' + kills + '</b>';
+    ovText.innerHTML = sub;
+    renderLeaderboard(ovLb, score);
+    startBtn.textContent = '再来一局';
+    overlayMode = 'gameover';
+    overlay.classList.remove('hidden');
+  }
+
+  function draw() {
+    const theme = THEMES[settings.theme] || THEMES.classic;
+    ctx.clearRect(0, 0, boardPx, boardPx);
+    for (let y = 0; y < GRID; y++) for (let x = 0; x < GRID; x++) {
+      if ((x + y) % 2 === 0) { ctx.fillStyle = 'rgba(255,255,255,0.025)'; ctx.fillRect(x * CELL, y * CELL, CELL, CELL); }
+    }
+    obstacles.forEach(o => {
+      ctx.fillStyle = theme.obstacle;
+      roundRect(o.x * CELL + 1, o.y * CELL + 1, CELL - 2, CELL - 2, 4); ctx.fill();
+      ctx.fillStyle = 'rgba(255,255,255,0.12)';
+      roundRect(o.x * CELL + 1, o.y * CELL + 1, CELL - 2, (CELL - 2) / 2, 4); ctx.fill();
+    });
+    const mid = Math.floor(GRID / 2);
+    if (editing) {
+      ctx.fillStyle = 'rgba(74,222,128,0.10)';
+      ctx.fillRect((mid - 2) * CELL, (mid - 2) * CELL, 5 * CELL, 5 * CELL);
+      ctx.strokeStyle = 'rgba(74,222,128,0.5)'; ctx.lineWidth = 1.5;
+      ctx.strokeRect((mid - 2) * CELL + 0.5, (mid - 2) * CELL + 0.5, 5 * CELL - 1, 5 * CELL - 1);
+      return;
+    }
+    // 普通食物
+    const pulse = 1 + 0.08 * Math.sin(Date.now() / 200);
+    const fs = (CELL - 6) * pulse; const off = (CELL - fs) / 2;
+    ctx.fillStyle = theme.food;
+    roundRect(food.x * CELL + off, food.y * CELL + off, fs, fs, 6); ctx.fill();
+    // 特殊道具（可同时存在多个，数量随尺寸增加）
+    const colors = { gold: '#fbbf24', grow: '#c084fc', slow: '#38bdf8' };
+    const emo = { gold: '⭐', grow: '💎', slow: '🐢' };
+    specials.forEach(sp => {
+      const c = colors[sp.type];
+      ctx.fillStyle = c;
+      roundRect(sp.x * CELL + 2, sp.y * CELL + 2, CELL - 4, CELL - 4, 7); ctx.fill();
+      // 剩余时间环
+      const remain = Math.max(0, (sp.expire - gameNow) / sp.life);
+      ctx.strokeStyle = 'rgba(255,255,255,0.85)'; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.arc(sp.x * CELL + CELL/2, sp.y * CELL + CELL/2, CELL/2 - 3, -Math.PI/2, -Math.PI/2 + remain * Math.PI * 2); ctx.stroke();
+      ctx.fillStyle = '#0b1020'; ctx.font = (CELL * 0.62) + 'px serif';
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText(emo[sp.type], sp.x * CELL + CELL/2, sp.y * CELL + CELL/2 + 1);
+    });
+    // 蛇
+    snake.forEach((s, i) => {
+      ctx.fillStyle = i === 0 ? theme.head : theme.snake;
+      roundRect(s.x * CELL + 1.5, s.y * CELL + 1.5, CELL - 3, CELL - 3, 5); ctx.fill();
+    });
+    const h = snake[0]; ctx.fillStyle = '#0b1020';
+    const cx = h.x * CELL, cy = h.y * CELL, ex = dir.x, ey = dir.y;
+    const o1x = cx + CELL/2 + (ex*4) + (ey*4), o1y = cy + CELL/2 + (ey*4) - (ex*4);
+    const o2x = cx + CELL/2 + (ex*4) - (ey*4), o2y = cy + CELL/2 + (ey*4) + (ex*4);
+    ctx.beginPath(); ctx.arc(o1x, o1y, 2.2, 0, 7); ctx.fill();
+    ctx.beginPath(); ctx.arc(o2x, o2y, 2.2, 0, 7); ctx.fill();
+
+    // AI 对手蛇（白底头 + 黑眼，身体用各自颜色）
+    aiSnakes.forEach(s => {
+      if (!s.alive) return;
+      s.body.forEach((b, i) => {
+        ctx.fillStyle = i === 0 ? '#ffffff' : s.color;
+        roundRect(b.x * CELL + 1.5, b.y * CELL + 1.5, CELL - 3, CELL - 3, 5); ctx.fill();
+      });
+      const ah = s.body[0]; ctx.fillStyle = '#0b1020';
+      const bx = ah.x * CELL, by = ah.y * CELL, dx = s.dir.x, dy = s.dir.y;
+      const a1x = bx + CELL / 2 + dx * 4 + dy * 4, a1y = by + CELL / 2 + dy * 4 - dx * 4;
+      const a2x = bx + CELL / 2 + dx * 4 - dy * 4, a2y = by + CELL / 2 + dy * 4 + dx * 4;
+      ctx.beginPath(); ctx.arc(a1x, a1y, 2.2, 0, 7); ctx.fill();
+      ctx.beginPath(); ctx.arc(a2x, a2y, 2.2, 0, 7); ctx.fill();
+    });
+  }
+
+  function roundRect(x, y, w, h, r) {
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.arcTo(x + w, y, x + w, y + h, r);
+    ctx.arcTo(x + w, y + h, x, y + h, r);
+    ctx.arcTo(x, y + h, x, y, r);
+    ctx.arcTo(x, y, x + w, y, r);
+    ctx.closePath();
+  }
+
+  function currentSpeed() {
+    let sp = baseSpeed - Math.min(Math.floor(score / 50) * 8, baseSpeed / 2);
+    sp = Math.max(sp, 30);
+    if (gameNow < slowUntil) sp = Math.round(sp * 1.7);
+    return sp;
+  }
+
+  function updateTimer() {
+    if (!settings.timed) { timerEl.classList.add('hidden'); return; }
+    timerEl.classList.remove('hidden');
+    timerEl.textContent = '⏱ ' + Math.max(0, Math.ceil(timeLeft));
+  }
+
+  function frame(ts) {
+    if (!lastTick) lastTick = ts;
+    // 单帧时间差做上限钳制，避免切后台/卡顿回来后蛇瞬移多格
+    const dt = Math.min(ts - lastTick, 100);
+    lastTick = ts;
+    if (running && !paused && !editing) {
+      gameNow += dt;
+      acc += dt;
+      if (settings.timed) {
+        timeLeft -= dt / 1000;
+        if (timeLeft <= 0) { timeLeft = 0; updateTimer(); end('time'); draw(); return; }
+      }
+      while (acc >= currentSpeed()) { acc -= currentSpeed(); step(); if (gameOver) break; }
+      // 特殊道具生成（补足到上限）/过期
+      if (specials.length < maxSpecials() && gameNow >= nextSpecialAt) {
+        if (Math.random() < 0.7) spawnSpecial(); else nextSpecialAt = gameNow + 2000;
+      }
+      for (let i = specials.length - 1; i >= 0; i--) {
+        if (gameNow >= specials[i].expire) { specials.splice(i, 1); nextSpecialAt = gameNow + 3000 + Math.random() * 3000; }
+      }
+    }
+    draw();
+    updateTimer();
+    requestAnimationFrame(frame);
+  }
+
+  // —— 覆盖层 ——
+  function showStart() {
+    overlayMode = 'start';
+    lbActions.style.display = 'none';
+    ovTitle.textContent = '准备开始';
+    ovText.innerHTML = '用 方向键 / WASD 控制方向<br/>手机可直接滑动屏幕<br/>吃到食物得分，撞墙或撞自己即结束<br/><span style="color:var(--accent)">开启「AI 对战」可与电脑同场竞技</span>';
+    renderLeaderboard(ovLb, null);
+    startBtn.textContent = '开始游戏';
+    overlay.classList.remove('hidden');
+  }
+  function showLeaderboard() {
+    overlayMode = 'leaderboard';
+    lbActions.style.display = 'flex';
+    ovTitle.textContent = '🏆 排行榜';
+    ovText.innerHTML = '本机 Top 5 战绩';
+    renderLeaderboard(ovLb, null);
+    startBtn.textContent = running ? '继续游戏' : '开始游戏';
+    overlay.classList.remove('hidden');
+  }
+  function showAchievements() {
+    overlayMode = 'achievements';
+    lbActions.style.display = 'none';
+    ovTitle.textContent = '🏆 成就';
+    ovText.innerHTML = '收集你的里程碑';
+    renderAchievements(ovLb);
+    startBtn.textContent = running ? '继续游戏' : '开始游戏';
+    overlay.classList.remove('hidden');
+  }
+  function showTipMsg(msg) {
+    editTip.textContent = msg;
+    clearTimeout(showTipMsg._t);
+    showTipMsg._t = setTimeout(() => { editTip.textContent = ''; }, 1400);
+  }
+
+  // —— 自定义地图编辑器 ——
+  function updateEditorRow() { editorow.style.display = (settings.map === 'custom') ? 'flex' : 'none'; }
+  function enterEdit() {
+    if (running && !paused) { showTipMsg('游戏进行中，请先暂停或结束后再编辑'); return; }
+    editing = true;
+    obstacles = settings.customMap.map(p => ({ x: p.x, y: p.y }));
+    editBtn.classList.add('on'); editBtn.textContent = '完成编辑';
+    overlay.classList.add('hidden');
+    showTipMsg('点击格子放置/清除障碍 · 中心绿框为出生安全区');
+    draw();
+  }
+  function exitEdit() {
+    editing = false;
+    editBtn.classList.remove('on'); editBtn.textContent = '✏️ 编辑地图';
+    saveSettings();
+    if (!running) showStart();
+    draw();
+  }
+  function cellFromPoint(clientX, clientY) {
+    const rect = canvas.getBoundingClientRect();
+    const x = Math.floor((clientX - rect.left) / rect.width * GRID);
+    const y = Math.floor((clientY - rect.top) / rect.height * GRID);
+    return { x, y };
+  }
+  function toggleObstacleAt(cx, cy) {
+    if (cx < 0 || cy < 0 || cx >= GRID || cy >= GRID) return;
+    const k = cx + ',' + cy;
+    if (centerReserved().has(k)) { showTipMsg('出生安全区不可放置'); return; }
+    const set = new Set(settings.customMap.map(p => p.x + ',' + p.y));
+    if (set.has(k)) set.delete(k); else set.add(k);
+    if (!isConnected(set)) { showTipMsg('会堵死通路，已撤销'); return; }
+    settings.customMap = [...set].map(s => { const [x, y] = s.split(',').map(Number); return { x, y }; });
+    saveSettings();
+    obstacles = settings.customMap.map(p => ({ x: p.x, y: p.y }));
+    draw();
+  }
+  function exportCode() {
+    if (!editing) { showTipMsg('先点「编辑地图」进入编辑'); return; }
+    const arr = settings.customMap.map(p => [p.x, p.y]);
+    const code = btoa(JSON.stringify(arr));
+    prompt('复制下面的地图分享码，发给朋友（对方在「自定义」地图里点「导入码」粘贴即可）：', code);
+  }
+  function importCode() {
+    const code = prompt('粘贴地图分享码：');
+    if (!code) return;
+    try {
+      const arr = JSON.parse(atob(code.trim()));
+      if (!Array.isArray(arr)) throw new Error('bad');
+      const reserved = centerReserved();
+      const seen = new Set(); const map = [];
+      arr.forEach(pair => {
+        if (!Array.isArray(pair) || pair.length !== 2) return;
+        const x = pair[0] | 0, y = pair[1] | 0;
+        if (x < 0 || y < 0 || x >= GRID || y >= GRID) return;
+        const k = x + ',' + y;
+        if (seen.has(k) || reserved.has(k)) return;
+        seen.add(k); map.push({ x, y });
+      });
+      const set = new Set(map.map(p => p.x + ',' + p.y));
+      if (!isConnected(set)) { toast('该地图会堵死通路，导入已拒绝'); return; }
+      settings.customMap = map; saveSettings();
+      if (editing) obstacles = map.map(p => ({ x: p.x, y: p.y }));
+      toast('✅ 已导入地图（' + map.length + ' 个障碍）');
+      draw();
+    } catch (e) { toast('分享码无效'); }
+  }
+  editBtn.addEventListener('click', () => { if (editing) exitEdit(); else enterEdit(); });
+  clearBtn.addEventListener('click', () => {
+    if (!editing) { showTipMsg('先点「编辑地图」再清空'); return; }
+    settings.customMap = []; saveSettings(); obstacles = []; draw(); showTipMsg('已清空全部障碍');
+  });
+  exportBtn.addEventListener('click', exportCode);
+  importBtn.addEventListener('click', importCode);
+  canvas.addEventListener('click', (e) => { if (editing) { const c = cellFromPoint(e.clientX, e.clientY); toggleObstacleAt(c.x, c.y); } });
+  canvas.addEventListener('touchstart', (e) => {
+    if (editing) { const t = e.touches[0]; const c = cellFromPoint(t.clientX, t.clientY); toggleObstacleAt(c.x, c.y); e.preventDefault(); }
+  }, { passive: false });
+
+  function start() {
+    ensureAudio();
+    reset();
+    // 记录已玩地图（成就：地图收藏家）
+    if (!settings.mapsPlayed.includes(settings.map)) {
+      settings.mapsPlayed.push(settings.map);
+      saveSettings();
+      if (BUILTIN_MAPS.every(m => settings.mapsPlayed.includes(m))) unlock('collector');
+    }
+    timeLeft = settings.timed ? TIME_LIMIT : 0;
+    updateTimer();
+    overlay.classList.add('hidden');
+    running = true; paused = false; lastTick = 0; acc = 0;
+    pauseBtn.textContent = '暂停';
+  }
+  function togglePause() {
+    if (!running) return;
+    paused = !paused;
+    pauseBtn.textContent = paused ? '继续' : '暂停';
+  }
+
+  // 键盘
+  const keymap = {
+    ArrowUp: { x: 0, y: -1 }, ArrowDown: { x: 0, y: 1 }, ArrowLeft: { x: -1, y: 0 }, ArrowRight: { x: 1, y: 0 },
+    w: { x: 0, y: -1 }, s: { x: 0, y: 1 }, a: { x: -1, y: 0 }, d: { x: 1, y: 0 },
+  };
+  window.addEventListener('keydown', (e) => {
+    if (e.key === ' ') { e.preventDefault(); togglePause(); return; }
+    const nd = keymap[e.key];
+    if (nd) {
+      e.preventDefault();
+      if (nd.x === -dir.x && nd.y === -dir.y) return;
+      if (nd.x !== nextDir.x || nd.y !== nextDir.y) sndTurn();
+      nextDir = nd;
+    }
+  });
+
+  // 触屏滑动（游玩时）
+  let touchStart = null;
+  canvas.addEventListener('touchstart', (e) => { if (!editing) touchStart = { x: e.touches[0].clientX, y: e.touches[0].clientY }; }, { passive: true });
+  canvas.addEventListener('touchmove', (e) => {
+    if (editing || !touchStart) return;
+    const dx = e.touches[0].clientX - touchStart.x;
+    const dy = e.touches[0].clientY - touchStart.y;
+    if (Math.abs(dx) < 20 && Math.abs(dy) < 20) return;
+    let nd;
+    if (Math.abs(dx) > Math.abs(dy)) nd = { x: dx > 0 ? 1 : -1, y: 0 };
+    else nd = { x: 0, y: dy > 0 ? 1 : -1 };
+    if (!(nd.x === -dir.x && nd.y === -dir.y)) {
+      if (nd.x !== nextDir.x || nd.y !== nextDir.y) sndTurn();
+      nextDir = nd;
+    }
+    touchStart = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+  }, { passive: true });
+
+  // 难度
+  document.querySelectorAll('.diff button').forEach(b => {
+    b.addEventListener('click', () => {
+      document.querySelectorAll('.diff button').forEach(x => x.classList.remove('active'));
+      b.classList.add('active');
+      baseSpeed = parseInt(b.dataset.speed, 10);
+    });
+  });
+
+  // 格子滑块：控制网格格数（15~35 奇数）；格子越多，棋盘越大、道具越多
+  GRID = normGrid(settings.size);
+  sizeRange.value = GRID; sizeVal.textContent = GRID + '×' + GRID;
+  sizeRange.addEventListener('input', () => {
+    GRID = parseInt(sizeRange.value, 10);
+    sizeVal.textContent = GRID + '×' + GRID;
+    settings.size = GRID; saveSettings();
+    reset();
+    applySize();
+  });
+  window.addEventListener('resize', applySize);
+
+  startBtn.addEventListener('click', () => {
+    if (running && !gameOver) { overlay.classList.add('hidden'); return; }
+    start();
+  });
+  pauseBtn.addEventListener('click', togglePause);
+  restartBtn.addEventListener('click', start);
+  lbBtn.addEventListener('click', showLeaderboard);
+  achBtn.addEventListener('click', showAchievements);
+
+  // 初始
+  nameTag.textContent = playerName;
+  editing = false;
+  reset();
+  applySize();
+  updateEditorRow();
+  showStart();
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
